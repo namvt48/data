@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alpha-1 Bangoc Backtest - Report</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0f172a; color: #e2e8f0; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; }
+.container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+h1 { color: #38bdf8; font-size: 22px; margin-bottom: 4px; }
+h2 { color: #f59e0b; font-size: 16px; margin: 30px 0 12px; border-bottom: 1px solid #334155; padding-bottom: 6px; }
+h3 { color: #94a3b8; font-size: 13px; margin: 20px 0 8px; }
+.subtitle { color: #64748b; font-size: 12px; margin-bottom: 20px; }
+.config { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 16px; margin-bottom: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; }
+.config span { color: #94a3b8; }
+.config b { color: #f1f5f9; }
+.fee-highlight { color: #fbbf24 !important; }
+table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+th { background: #1e293b; color: #94a3b8; text-align: left; padding: 8px 10px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #334155; position: sticky; top: 0; }
+td { padding: 7px 10px; border-bottom: 1px solid #1e293b; }
+tr:hover td { background: #1e293b; }
+.pos { color: #22c55e; }
+.neg { color: #ef4444; }
+.summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.summary-card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 14px; }
+.summary-card .label { color: #64748b; font-size: 11px; text-transform: uppercase; }
+.summary-card .value { font-size: 20px; font-weight: 700; margin-top: 4px; }
+.summary-card .sub { color: #64748b; font-size: 11px; margin-top: 2px; }
+.tf-section { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 20px; margin-bottom: 24px; }
+.chart-container { position: relative; background: #0f172a; border: 1px solid #334155; border-radius: 8px; margin: 16px 0; overflow: hidden; }
+.chart-container canvas { display: block; width: 100%; }
+.chart-title { position: absolute; top: 12px; left: 16px; color: #94a3b8; font-size: 12px; z-index: 2; pointer-events: none; }
+.chart-legend { display: flex; gap: 16px; padding: 8px 16px; background: #1e293b; border-top: 1px solid #334155; font-size: 11px; }
+.chart-legend span { display: flex; align-items: center; gap: 4px; color: #94a3b8; }
+.chart-legend .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.chart-tooltip { position: absolute; background: #1e293b; border: 1px solid #475569; border-radius: 6px; padding: 8px 12px; font-size: 11px; pointer-events: none; display: none; z-index: 10; white-space: nowrap; }
+.coin-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 12px; margin-top: 16px; }
+.coin-chart-wrap { background: #0f172a; border: 1px solid #334155; border-radius: 8px; overflow: hidden; }
+.coin-chart-wrap .coin-header { padding: 8px 12px; font-size: 12px; color: #e2e8f0; background: #1e293b; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; }
+.coin-chart-wrap canvas { display: block; width: 100%; }
+footer { text-align: center; color: #475569; margin-top: 40px; padding: 20px; border-top: 1px solid #1e293b; font-size: 11px; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>ALPHA-1 BANGOC BACKTEST</h1>
+<p class="subtitle">
+  Source: Binance Futures &nbsp;|&nbsp;
+  Fee: <b style="color:#fbbf24">0.0357% / side</b> &nbsp;|&nbsp;
+  2025-08-01 &rarr; 2026-06-04
+</p>
+<div class="config">
+<div><span>Von:</span> <b>$10,000</b></div>
+<div><span>Size:</span> <b>$1,000 fixed</b></div>
+<div><span>Fee thuc:</span> <b class="fee-highlight">0.0357%</b></div>
+<div><span>Indi1:</span> <b>SMA(85), norm 500</b></div>
+<div><span>Indi1 threshold:</span> <b>&plusmn;0.1</b></div>
+<div><span>Indi2:</span> <b>POC/median(85)</b></div>
+<div><span>Rule:</span> <b>same color, reverse on opposite</b></div>
+</div>
+
+<div class="tf-section">
+<h2>M15 — 15 coins co du lieu</h2>
+<div class="summary-grid">
+<div class="summary-card">
+  <div class="label">Tong lenh</div>
+  <div class="value">4275</div>
+  <div class="sub">Long: 2133 | Short: 2142</div>
+</div>
+<div class="summary-card">
+  <div class="label">Win Rate (co fee)</div>
+  <div class="value" style="color:#ef4444">32.1%</div>
+  <div class="sub">Khong fee: 32.6% (delta: +0.5%)</div>
+</div>
+<div class="summary-card">
+  <div class="label">P&L Rong</div>
+  <div class="value" style="color:#ef4444">$-4,966.14</div>
+  <div class="sub">Truoc fee: $-1,917.89 | Fee: $3,048.25</div>
+</div>
+<div class="summary-card">
+  <div class="label">Sharpe Ratio (TB)</div>
+  <div class="value" style="color:#ef4444">-0.49</div>
+  <div class="sub">Yeu</div>
+</div>
+<div class="summary-card">
+  <div class="label">Max DD (cao nhat)</div>
+  <div class="value neg">15.58%</div>
+  <div class="sub">Co lai: 4/15 coins</div>
+</div>
+<div class="summary-card">
+  <div class="label">Net P&L tong (15 coins)</div>
+  <div class="value" style="color:#ef4444">$-4,966.14</div>
+  <div class="sub">TB/coin: $-331.08 &nbsp;|&nbsp; ROI TB: -3.31%</div>
+</div>
+</div>
+
+<div class="chart-container">
+  <div class="chart-title">EQUITY CURVE TONG HOP — M15 (15 coins)</div>
+  <canvas id="chart_agg_M15" height="220"></canvas>
+  <div class="chart-legend">
+    <span><span class="dot" style="background:#38bdf8"></span> Equity</span>
+    <span>Von ban dau/coin: $10,000 &times; 15 coins</span>
+    <span>Net P&L tong: <b style="color:#ef4444">$-4,966.14</b> (TB $-331.08/coin)</span>
+  </div>
+  <div class="chart-tooltip" id="tip_agg_M15"></div>
+</div>
+
+<h3>Equity Curve theo tung coin</h3>
+<div class="coin-charts">
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>ENA</b> — 278 lenh</span>
+    <span style="color:#22c55e">$+774.48 (+7.7%)</span>
+  </div>
+  <canvas id="chart_coin_M15_ENA" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_M15_ENA"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>BNB</b> — 285 lenh</span>
+    <span style="color:#22c55e">$+424.13 (+4.2%)</span>
+  </div>
+  <canvas id="chart_coin_M15_BNB" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_M15_BNB"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>SUI</b> — 272 lenh</span>
+    <span style="color:#22c55e">$+415.56 (+4.2%)</span>
+  </div>
+  <canvas id="chart_coin_M15_SUI" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_M15_SUI"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>SOL</b> — 273 lenh</span>
+    <span style="color:#22c55e">$+45.53 (+0.5%)</span>
+  </div>
+  <canvas id="chart_coin_M15_SOL" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_M15_SOL"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>ETH</b> — 275 lenh</span>
+    <span style="color:#ef4444">$-57.63 (-0.6%)</span>
+  </div>
+  <canvas id="chart_coin_M15_ETH" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_M15_ETH"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>AVAX</b> — 295 lenh</span>
+    <span style="color:#ef4444">$-255.12 (-2.6%)</span>
+  </div>
+  <canvas id="chart_coin_M15_AVAX" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_M15_AVAX"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>APT</b> — 291 lenh</span>
+    <span style="color:#ef4444">$-279.02 (-2.8%)</span>
+  </div>
+  <canvas id="chart_coin_M15_APT" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_M15_APT"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>SEI</b> — 275 lenh</span>
+    <span style="color:#ef4444">$-312.14 (-3.1%)</span>
+  </div>
+  <canvas id="chart_coin_M15_SEI" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_M15_SEI"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>XRP</b> — 275 lenh</span>
+    <span style="color:#ef4444">$-457.61 (-4.6%)</span>
+  </div>
+  <canvas id="chart_coin_M15_XRP" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_M15_XRP"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>NEAR</b> — 284 lenh</span>
+    <span style="color:#ef4444">$-570.70 (-5.7%)</span>
+  </div>
+  <canvas id="chart_coin_M15_NEAR" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_M15_NEAR"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>INJ</b> — 295 lenh</span>
+    <span style="color:#ef4444">$-681.36 (-6.8%)</span>
+  </div>
+  <canvas id="chart_coin_M15_INJ" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_M15_INJ"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>LINK</b> — 283 lenh</span>
+    <span style="color:#ef4444">$-769.74 (-7.7%)</span>
+  </div>
+  <canvas id="chart_coin_M15_LINK" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_M15_LINK"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>TIA</b> — 290 lenh</span>
+    <span style="color:#ef4444">$-820.14 (-8.2%)</span>
+  </div>
+  <canvas id="chart_coin_M15_TIA" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_M15_TIA"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>ARB</b> — 298 lenh</span>
+    <span style="color:#ef4444">$-1,140.16 (-11.4%)</span>
+  </div>
+  <canvas id="chart_coin_M15_ARB" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_M15_ARB"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>DOT</b> — 306 lenh</span>
+    <span style="color:#ef4444">$-1,282.22 (-12.8%)</span>
+  </div>
+  <canvas id="chart_coin_M15_DOT" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_M15_DOT"></div>
+</div>
+</div>
+
+<h3>Chi tiet theo coin</h3>
+<table>
+<thead>
+<tr>
+  <th>Coin</th><th>Lenh</th><th>Long</th><th>Short</th>
+  <th>WR (co fee)</th><th>WR (khong fee)</th><th>Delta</th>
+  <th>Net P&L</th><th>Fee</th><th>PF</th><th>Sharpe</th>
+  <th>Max DD</th><th>Win/Lose Streak</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><b>ENA</b></td>
+  <td>278</td>
+  <td>139 <span style="color:#64748b">(27%)</span></td>
+  <td>139 <span style="color:#64748b">(40%)</span></td>
+  <td style="color:#ef4444">33.8%</td>
+  <td style="color:#ef4444">33.8%</td>
+  <td style="color:#94a3b8">0.0%</td>
+  <td style="color:#22c55e">$+774.48</td>
+  <td style="color:#94a3b8">$198.08</td>
+  <td style="color:#22c55e">1.15</td>
+  <td style="color:#eab308">0.89</td>
+  <td class="neg">5.74%</td>
+  <td>4W / 9L</td>
+</tr><tr>
+  <td><b>BNB</b></td>
+  <td>285</td>
+  <td>142 <span style="color:#64748b">(39%)</span></td>
+  <td>143 <span style="color:#64748b">(31%)</span></td>
+  <td style="color:#eab308">35.1%</td>
+  <td style="color:#eab308">36.1%</td>
+  <td style="color:#22c55e">+1.1%</td>
+  <td style="color:#22c55e">$+424.13</td>
+  <td style="color:#94a3b8">$203.45</td>
+  <td style="color:#22c55e">1.17</td>
+  <td style="color:#eab308">0.96</td>
+  <td class="neg">3.46%</td>
+  <td>5W / 18L</td>
+</tr><tr>
+  <td><b>SUI</b></td>
+  <td>272</td>
+  <td>136 <span style="color:#64748b">(32%)</span></td>
+  <td>136 <span style="color:#64748b">(37%)</span></td>
+  <td style="color:#ef4444">34.2%</td>
+  <td style="color:#ef4444">34.6%</td>
+  <td style="color:#22c55e">+0.4%</td>
+  <td style="color:#22c55e">$+415.56</td>
+  <td style="color:#94a3b8">$193.79</td>
+  <td style="color:#22c55e">1.10</td>
+  <td style="color:#eab308">0.61</td>
+  <td class="neg">4.76%</td>
+  <td>5W / 10L</td>
+</tr><tr>
+  <td><b>SOL</b></td>
+  <td>273</td>
+  <td>136 <span style="color:#64748b">(34%)</span></td>
+  <td>137 <span style="color:#64748b">(33%)</span></td>
+  <td style="color:#ef4444">33.3%</td>
+  <td style="color:#ef4444">34.8%</td>
+  <td style="color:#22c55e">+1.5%</td>
+  <td style="color:#22c55e">$+45.53</td>
+  <td style="color:#94a3b8">$194.68</td>
+  <td style="color:#22c55e">1.01</td>
+  <td style="color:#ef4444">0.08</td>
+  <td class="neg">10.22%</td>
+  <td>5W / 9L</td>
+</tr><tr>
+  <td><b>ETH</b></td>
+  <td>275</td>
+  <td>137 <span style="color:#64748b">(34%)</span></td>
+  <td>138 <span style="color:#64748b">(36%)</span></td>
+  <td style="color:#ef4444">34.9%</td>
+  <td style="color:#ef4444">34.9%</td>
+  <td style="color:#94a3b8">0.0%</td>
+  <td style="color:#ef4444">$-57.63</td>
+  <td style="color:#94a3b8">$196.16</td>
+  <td style="color:#ef4444">0.98</td>
+  <td style="color:#ef4444">-0.11</td>
+  <td class="neg">6.81%</td>
+  <td>5W / 11L</td>
+</tr><tr>
+  <td><b>AVAX</b></td>
+  <td>295</td>
+  <td>147 <span style="color:#64748b">(27%)</span></td>
+  <td>148 <span style="color:#64748b">(32%)</span></td>
+  <td style="color:#ef4444">29.8%</td>
+  <td style="color:#ef4444">30.5%</td>
+  <td style="color:#22c55e">+0.7%</td>
+  <td style="color:#ef4444">$-255.12</td>
+  <td style="color:#94a3b8">$210.34</td>
+  <td style="color:#ef4444">0.93</td>
+  <td style="color:#ef4444">-0.44</td>
+  <td class="neg">5.56%</td>
+  <td>5W / 14L</td>
+</tr><tr>
+  <td><b>APT</b></td>
+  <td>291</td>
+  <td>145 <span style="color:#64748b">(26%)</span></td>
+  <td>146 <span style="color:#64748b">(31%)</span></td>
+  <td style="color:#ef4444">28.2%</td>
+  <td style="color:#ef4444">28.9%</td>
+  <td style="color:#22c55e">+0.7%</td>
+  <td style="color:#ef4444">$-279.02</td>
+  <td style="color:#94a3b8">$207.30</td>
+  <td style="color:#ef4444">0.94</td>
+  <td style="color:#ef4444">-0.38</td>
+  <td class="neg">11.30%</td>
+  <td>3W / 19L</td>
+</tr><tr>
+  <td><b>SEI</b></td>
+  <td>275</td>
+  <td>137 <span style="color:#64748b">(32%)</span></td>
+  <td>138 <span style="color:#64748b">(37%)</span></td>
+  <td style="color:#ef4444">34.5%</td>
+  <td style="color:#ef4444">34.9%</td>
+  <td style="color:#22c55e">+0.4%</td>
+  <td style="color:#ef4444">$-312.14</td>
+  <td style="color:#94a3b8">$195.87</td>
+  <td style="color:#ef4444">0.93</td>
+  <td style="color:#ef4444">-0.49</td>
+  <td class="neg">9.70%</td>
+  <td>4W / 13L</td>
+</tr><tr>
+  <td><b>XRP</b></td>
+  <td>275</td>
+  <td>137 <span style="color:#64748b">(28%)</span></td>
+  <td>138 <span style="color:#64748b">(40%)</span></td>
+  <td style="color:#ef4444">34.2%</td>
+  <td style="color:#ef4444">34.2%</td>
+  <td style="color:#94a3b8">0.0%</td>
+  <td style="color:#ef4444">$-457.61</td>
+  <td style="color:#94a3b8">$196.08</td>
+  <td style="color:#ef4444">0.86</td>
+  <td style="color:#ef4444">-0.93</td>
+  <td class="neg">7.57%</td>
+  <td>4W / 10L</td>
+</tr><tr>
+  <td><b>NEAR</b></td>
+  <td>284</td>
+  <td>142 <span style="color:#64748b">(28%)</span></td>
+  <td>142 <span style="color:#64748b">(33%)</span></td>
+  <td style="color:#ef4444">30.6%</td>
+  <td style="color:#ef4444">31.0%</td>
+  <td style="color:#22c55e">+0.4%</td>
+  <td style="color:#ef4444">$-570.70</td>
+  <td style="color:#94a3b8">$202.96</td>
+  <td style="color:#ef4444">0.89</td>
+  <td style="color:#ef4444">-0.67</td>
+  <td class="neg">10.75%</td>
+  <td>3W / 10L</td>
+</tr><tr>
+  <td><b>INJ</b></td>
+  <td>295</td>
+  <td>147 <span style="color:#64748b">(30%)</span></td>
+  <td>148 <span style="color:#64748b">(32%)</span></td>
+  <td style="color:#ef4444">31.2%</td>
+  <td style="color:#ef4444">32.5%</td>
+  <td style="color:#22c55e">+1.4%</td>
+  <td style="color:#ef4444">$-681.36</td>
+  <td style="color:#94a3b8">$210.49</td>
+  <td style="color:#ef4444">0.87</td>
+  <td style="color:#ef4444">-0.95</td>
+  <td class="neg">12.54%</td>
+  <td>5W / 14L</td>
+</tr><tr>
+  <td><b>LINK</b></td>
+  <td>283</td>
+  <td>141 <span style="color:#64748b">(30%)</span></td>
+  <td>142 <span style="color:#64748b">(35%)</span></td>
+  <td style="color:#ef4444">32.2%</td>
+  <td style="color:#ef4444">32.9%</td>
+  <td style="color:#22c55e">+0.7%</td>
+  <td style="color:#ef4444">$-769.74</td>
+  <td style="color:#94a3b8">$201.89</td>
+  <td style="color:#ef4444">0.82</td>
+  <td style="color:#ef4444">-1.25</td>
+  <td class="neg">14.80%</td>
+  <td>4W / 8L</td>
+</tr><tr>
+  <td><b>TIA</b></td>
+  <td>290</td>
+  <td>145 <span style="color:#64748b">(28%)</span></td>
+  <td>145 <span style="color:#64748b">(32%)</span></td>
+  <td style="color:#ef4444">30.0%</td>
+  <td style="color:#ef4444">30.3%</td>
+  <td style="color:#22c55e">+0.3%</td>
+  <td style="color:#ef4444">$-820.14</td>
+  <td style="color:#94a3b8">$206.66</td>
+  <td style="color:#ef4444">0.85</td>
+  <td style="color:#ef4444">-1.03</td>
+  <td class="neg">12.43%</td>
+  <td>4W / 12L</td>
+</tr><tr>
+  <td><b>ARB</b></td>
+  <td>298</td>
+  <td>149 <span style="color:#64748b">(27%)</span></td>
+  <td>149 <span style="color:#64748b">(40%)</span></td>
+  <td style="color:#ef4444">33.6%</td>
+  <td style="color:#ef4444">33.6%</td>
+  <td style="color:#94a3b8">0.0%</td>
+  <td style="color:#ef4444">$-1,140.16</td>
+  <td style="color:#94a3b8">$212.36</td>
+  <td style="color:#ef4444">0.79</td>
+  <td style="color:#ef4444">-1.65</td>
+  <td class="neg">15.29%</td>
+  <td>4W / 11L</td>
+</tr><tr>
+  <td><b>DOT</b></td>
+  <td>306</td>
+  <td>153 <span style="color:#64748b">(21%)</span></td>
+  <td>153 <span style="color:#64748b">(34%)</span></td>
+  <td style="color:#ef4444">27.5%</td>
+  <td style="color:#ef4444">27.8%</td>
+  <td style="color:#22c55e">+0.3%</td>
+  <td style="color:#ef4444">$-1,282.22</td>
+  <td style="color:#94a3b8">$218.15</td>
+  <td style="color:#ef4444">0.75</td>
+  <td style="color:#ef4444">-1.99</td>
+  <td class="neg">15.58%</td>
+  <td>4W / 14L</td>
+</tr>
+</tbody>
+<tfoot>
+<tr style="border-top:2px solid #334155;font-weight:700">
+  <td>TONG</td><td>4275</td><td>2133</td><td>2142</td>
+  <td style="color:#ef4444">32.1%</td>
+  <td style="color:#ef4444">32.6%</td>
+  <td style="color:#22c55e">+0.5%</td>
+  <td style="color:#ef4444">$-4,966.14</td>
+  <td>$3,048.25</td>
+  <td>—</td>
+  <td style="color:#ef4444">-0.49</td>
+  <td class="neg">15.58%</td>
+  <td>—</td>
+</tr>
+</tfoot>
+</table>
+
+<h3>Thoat lenh</h3>
+<table style="max-width:480px">
+<tr><td>REV (dao chieu)</td><td>4260</td></tr>
+<tr><td>OPEN (mark-to-market cuoi ky)</td><td>15</td></tr>
+</table>
+
+</div>
+
+<div class="tf-section">
+<h2>H1 — 15 coins co du lieu</h2>
+<div class="summary-grid">
+<div class="summary-card">
+  <div class="label">Tong lenh</div>
+  <div class="value">1092</div>
+  <div class="sub">Long: 540 | Short: 552</div>
+</div>
+<div class="summary-card">
+  <div class="label">Win Rate (co fee)</div>
+  <div class="value" style="color:#ef4444">29.7%</div>
+  <div class="sub">Khong fee: 30.3% (delta: +0.6%)</div>
+</div>
+<div class="summary-card">
+  <div class="label">P&L Rong</div>
+  <div class="value" style="color:#ef4444">$-4,294.63</div>
+  <div class="sub">Truoc fee: $-3,518.94 | Fee: $775.69</div>
+</div>
+<div class="summary-card">
+  <div class="label">Sharpe Ratio (TB)</div>
+  <div class="value" style="color:#ef4444">-0.51</div>
+  <div class="sub">Yeu</div>
+</div>
+<div class="summary-card">
+  <div class="label">Max DD (cao nhat)</div>
+  <div class="value neg">12.15%</div>
+  <div class="sub">Co lai: 3/15 coins</div>
+</div>
+<div class="summary-card">
+  <div class="label">Net P&L tong (15 coins)</div>
+  <div class="value" style="color:#ef4444">$-4,294.63</div>
+  <div class="sub">TB/coin: $-286.31 &nbsp;|&nbsp; ROI TB: -2.86%</div>
+</div>
+</div>
+
+<div class="chart-container">
+  <div class="chart-title">EQUITY CURVE TONG HOP — H1 (15 coins)</div>
+  <canvas id="chart_agg_H1" height="220"></canvas>
+  <div class="chart-legend">
+    <span><span class="dot" style="background:#38bdf8"></span> Equity</span>
+    <span>Von ban dau/coin: $10,000 &times; 15 coins</span>
+    <span>Net P&L tong: <b style="color:#ef4444">$-4,294.63</b> (TB $-286.31/coin)</span>
+  </div>
+  <div class="chart-tooltip" id="tip_agg_H1"></div>
+</div>
+
+<h3>Equity Curve theo tung coin</h3>
+<div class="coin-charts">
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>ARB</b> — 63 lenh</span>
+    <span style="color:#22c55e">$+506.03 (+5.1%)</span>
+  </div>
+  <canvas id="chart_coin_H1_ARB" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_H1_ARB"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>NEAR</b> — 70 lenh</span>
+    <span style="color:#22c55e">$+344.10 (+3.4%)</span>
+  </div>
+  <canvas id="chart_coin_H1_NEAR" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_H1_NEAR"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>SUI</b> — 69 lenh</span>
+    <span style="color:#22c55e">$+58.75 (+0.6%)</span>
+  </div>
+  <canvas id="chart_coin_H1_SUI" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_H1_SUI"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>ENA</b> — 66 lenh</span>
+    <span style="color:#ef4444">$-9.82 (-0.1%)</span>
+  </div>
+  <canvas id="chart_coin_H1_ENA" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_H1_ENA"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>TIA</b> — 69 lenh</span>
+    <span style="color:#ef4444">$-64.30 (-0.6%)</span>
+  </div>
+  <canvas id="chart_coin_H1_TIA" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_H1_TIA"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>ETH</b> — 71 lenh</span>
+    <span style="color:#ef4444">$-192.15 (-1.9%)</span>
+  </div>
+  <canvas id="chart_coin_H1_ETH" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_H1_ETH"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>XRP</b> — 79 lenh</span>
+    <span style="color:#ef4444">$-248.10 (-2.5%)</span>
+  </div>
+  <canvas id="chart_coin_H1_XRP" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_H1_XRP"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>DOT</b> — 69 lenh</span>
+    <span style="color:#ef4444">$-302.66 (-3.0%)</span>
+  </div>
+  <canvas id="chart_coin_H1_DOT" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_H1_DOT"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>INJ</b> — 72 lenh</span>
+    <span style="color:#ef4444">$-345.38 (-3.5%)</span>
+  </div>
+  <canvas id="chart_coin_H1_INJ" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_H1_INJ"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>BNB</b> — 75 lenh</span>
+    <span style="color:#ef4444">$-405.48 (-4.1%)</span>
+  </div>
+  <canvas id="chart_coin_H1_BNB" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_H1_BNB"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>APT</b> — 75 lenh</span>
+    <span style="color:#ef4444">$-414.03 (-4.1%)</span>
+  </div>
+  <canvas id="chart_coin_H1_APT" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_H1_APT"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>LINK</b> — 79 lenh</span>
+    <span style="color:#ef4444">$-556.63 (-5.6%)</span>
+  </div>
+  <canvas id="chart_coin_H1_LINK" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_H1_LINK"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>SEI</b> — 75 lenh</span>
+    <span style="color:#ef4444">$-643.98 (-6.4%)</span>
+  </div>
+  <canvas id="chart_coin_H1_SEI" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_H1_SEI"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>SOL</b> — 79 lenh</span>
+    <span style="color:#ef4444">$-898.93 (-9.0%)</span>
+  </div>
+  <canvas id="chart_coin_H1_SOL" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_H1_SOL"></div>
+</div>
+<div class="coin-chart-wrap">
+  <div class="coin-header">
+    <span><b>AVAX</b> — 81 lenh</span>
+    <span style="color:#ef4444">$-1,122.05 (-11.2%)</span>
+  </div>
+  <canvas id="chart_coin_H1_AVAX" height="120"></canvas>
+  <div class="chart-tooltip" id="tip_coin_H1_AVAX"></div>
+</div>
+</div>
+
+<h3>Chi tiet theo coin</h3>
+<table>
+<thead>
+<tr>
+  <th>Coin</th><th>Lenh</th><th>Long</th><th>Short</th>
+  <th>WR (co fee)</th><th>WR (khong fee)</th><th>Delta</th>
+  <th>Net P&L</th><th>Fee</th><th>PF</th><th>Sharpe</th>
+  <th>Max DD</th><th>Win/Lose Streak</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><b>ARB</b></td>
+  <td>63</td>
+  <td>31 <span style="color:#64748b">(29%)</span></td>
+  <td>32 <span style="color:#64748b">(41%)</span></td>
+  <td style="color:#ef4444">34.9%</td>
+  <td style="color:#ef4444">34.9%</td>
+  <td style="color:#94a3b8">0.0%</td>
+  <td style="color:#22c55e">$+506.03</td>
+  <td style="color:#94a3b8">$44.59</td>
+  <td style="color:#22c55e">1.26</td>
+  <td style="color:#eab308">0.70</td>
+  <td class="neg">5.71%</td>
+  <td>3W / 6L</td>
+</tr><tr>
+  <td><b>NEAR</b></td>
+  <td>70</td>
+  <td>35 <span style="color:#64748b">(37%)</span></td>
+  <td>35 <span style="color:#64748b">(29%)</span></td>
+  <td style="color:#ef4444">32.9%</td>
+  <td style="color:#ef4444">32.9%</td>
+  <td style="color:#94a3b8">0.0%</td>
+  <td style="color:#22c55e">$+344.10</td>
+  <td style="color:#94a3b8">$50.17</td>
+  <td style="color:#22c55e">1.15</td>
+  <td style="color:#ef4444">0.40</td>
+  <td class="neg">7.27%</td>
+  <td>3W / 8L</td>
+</tr><tr>
+  <td><b>SUI</b></td>
+  <td>69</td>
+  <td>34 <span style="color:#64748b">(24%)</span></td>
+  <td>35 <span style="color:#64748b">(40%)</span></td>
+  <td style="color:#ef4444">31.9%</td>
+  <td style="color:#ef4444">31.9%</td>
+  <td style="color:#94a3b8">0.0%</td>
+  <td style="color:#22c55e">$+58.75</td>
+  <td style="color:#94a3b8">$48.88</td>
+  <td style="color:#22c55e">1.03</td>
+  <td style="color:#ef4444">0.08</td>
+  <td class="neg">5.17%</td>
+  <td>3W / 8L</td>
+</tr><tr>
+  <td><b>ENA</b></td>
+  <td>66</td>
+  <td>33 <span style="color:#64748b">(24%)</span></td>
+  <td>33 <span style="color:#64748b">(42%)</span></td>
+  <td style="color:#ef4444">33.3%</td>
+  <td style="color:#ef4444">34.8%</td>
+  <td style="color:#22c55e">+1.5%</td>
+  <td style="color:#ef4444">$-9.82</td>
+  <td style="color:#94a3b8">$46.70</td>
+  <td style="color:#ef4444">1.00</td>
+  <td style="color:#ef4444">-0.01</td>
+  <td class="neg">11.08%</td>
+  <td>3W / 6L</td>
+</tr><tr>
+  <td><b>TIA</b></td>
+  <td>69</td>
+  <td>34 <span style="color:#64748b">(29%)</span></td>
+  <td>35 <span style="color:#64748b">(34%)</span></td>
+  <td style="color:#ef4444">31.9%</td>
+  <td style="color:#ef4444">31.9%</td>
+  <td style="color:#94a3b8">0.0%</td>
+  <td style="color:#ef4444">$-64.30</td>
+  <td style="color:#94a3b8">$48.88</td>
+  <td style="color:#ef4444">0.98</td>
+  <td style="color:#ef4444">-0.08</td>
+  <td class="neg">5.92%</td>
+  <td>3W / 9L</td>
+</tr><tr>
+  <td><b>ETH</b></td>
+  <td>71</td>
+  <td>35 <span style="color:#64748b">(26%)</span></td>
+  <td>36 <span style="color:#64748b">(28%)</span></td>
+  <td style="color:#ef4444">26.8%</td>
+  <td style="color:#ef4444">26.8%</td>
+  <td style="color:#94a3b8">0.0%</td>
+  <td style="color:#ef4444">$-192.15</td>
+  <td style="color:#94a3b8">$50.49</td>
+  <td style="color:#ef4444">0.89</td>
+  <td style="color:#ef4444">-0.40</td>
+  <td class="neg">6.90%</td>
+  <td>3W / 10L</td>
+</tr><tr>
+  <td><b>XRP</b></td>
+  <td>79</td>
+  <td>39 <span style="color:#64748b">(23%)</span></td>
+  <td>40 <span style="color:#64748b">(35%)</span></td>
+  <td style="color:#ef4444">29.1%</td>
+  <td style="color:#ef4444">30.4%</td>
+  <td style="color:#22c55e">+1.3%</td>
+  <td style="color:#ef4444">$-248.10</td>
+  <td style="color:#94a3b8">$56.13</td>
+  <td style="color:#ef4444">0.85</td>
+  <td style="color:#ef4444">-0.54</td>
+  <td class="neg">6.58%</td>
+  <td>3W / 8L</td>
+</tr><tr>
+  <td><b>DOT</b></td>
+  <td>69</td>
+  <td>34 <span style="color:#64748b">(24%)</span></td>
+  <td>35 <span style="color:#64748b">(34%)</span></td>
+  <td style="color:#ef4444">29.0%</td>
+  <td style="color:#ef4444">29.0%</td>
+  <td style="color:#94a3b8">0.0%</td>
+  <td style="color:#ef4444">$-302.66</td>
+  <td style="color:#94a3b8">$48.94</td>
+  <td style="color:#ef4444">0.87</td>
+  <td style="color:#ef4444">-0.46</td>
+  <td class="neg">5.94%</td>
+  <td>3W / 9L</td>
+</tr><tr>
+  <td><b>INJ</b></td>
+  <td>72</td>
+  <td>36 <span style="color:#64748b">(33%)</span></td>
+  <td>36 <span style="color:#64748b">(36%)</span></td>
+  <td style="color:#ef4444">34.7%</td>
+  <td style="color:#ef4444">34.7%</td>
+  <td style="color:#94a3b8">0.0%</td>
+  <td style="color:#ef4444">$-345.38</td>
+  <td style="color:#94a3b8">$51.26</td>
+  <td style="color:#ef4444">0.86</td>
+  <td style="color:#ef4444">-0.51</td>
+  <td class="neg">7.01%</td>
+  <td>3W / 9L</td>
+</tr><tr>
+  <td><b>BNB</b></td>
+  <td>75</td>
+  <td>37 <span style="color:#64748b">(30%)</span></td>
+  <td>38 <span style="color:#64748b">(32%)</span></td>
+  <td style="color:#ef4444">30.7%</td>
+  <td style="color:#ef4444">33.3%</td>
+  <td style="color:#22c55e">+2.7%</td>
+  <td style="color:#ef4444">$-405.48</td>
+  <td style="color:#94a3b8">$53.51</td>
+  <td style="color:#ef4444">0.74</td>
+  <td style="color:#ef4444">-0.90</td>
+  <td class="neg">6.23%</td>
+  <td>3W / 11L</td>
+</tr><tr>
+  <td><b>APT</b></td>
+  <td>75</td>
+  <td>37 <span style="color:#64748b">(24%)</span></td>
+  <td>38 <span style="color:#64748b">(29%)</span></td>
+  <td style="color:#ef4444">26.7%</td>
+  <td style="color:#ef4444">26.7%</td>
+  <td style="color:#94a3b8">0.0%</td>
+  <td style="color:#ef4444">$-414.03</td>
+  <td style="color:#94a3b8">$53.08</td>
+  <td style="color:#ef4444">0.84</td>
+  <td style="color:#ef4444">-0.58</td>
+  <td class="neg">9.87%</td>
+  <td>3W / 11L</td>
+</tr><tr>
+  <td><b>LINK</b></td>
+  <td>79</td>
+  <td>39 <span style="color:#64748b">(28%)</span></td>
+  <td>40 <span style="color:#64748b">(35%)</span></td>
+  <td style="color:#ef4444">31.6%</td>
+  <td style="color:#ef4444">32.9%</td>
+  <td style="color:#22c55e">+1.3%</td>
+  <td style="color:#ef4444">$-556.63</td>
+  <td style="color:#94a3b8">$56.23</td>
+  <td style="color:#ef4444">0.74</td>
+  <td style="color:#ef4444">-0.94</td>
+  <td class="neg">8.52%</td>
+  <td>2W / 9L</td>
+</tr><tr>
+  <td><b>SEI</b></td>
+  <td>75</td>
+  <td>37 <span style="color:#64748b">(24%)</span></td>
+  <td>38 <span style="color:#64748b">(39%)</span></td>
+  <td style="color:#ef4444">32.0%</td>
+  <td style="color:#ef4444">32.0%</td>
+  <td style="color:#94a3b8">0.0%</td>
+  <td style="color:#ef4444">$-643.98</td>
+  <td style="color:#94a3b8">$53.09</td>
+  <td style="color:#ef4444">0.75</td>
+  <td style="color:#ef4444">-0.99</td>
+  <td class="neg">7.27%</td>
+  <td>3W / 10L</td>
+</tr><tr>
+  <td><b>SOL</b></td>
+  <td>79</td>
+  <td>39 <span style="color:#64748b">(23%)</span></td>
+  <td>40 <span style="color:#64748b">(28%)</span></td>
+  <td style="color:#ef4444">25.3%</td>
+  <td style="color:#ef4444">27.8%</td>
+  <td style="color:#22c55e">+2.5%</td>
+  <td style="color:#ef4444">$-898.93</td>
+  <td style="color:#94a3b8">$56.18</td>
+  <td style="color:#ef4444">0.63</td>
+  <td style="color:#ef4444">-1.55</td>
+  <td class="neg">11.02%</td>
+  <td>3W / 13L</td>
+</tr><tr>
+  <td><b>AVAX</b></td>
+  <td>81</td>
+  <td>40 <span style="color:#64748b">(15%)</span></td>
+  <td>41 <span style="color:#64748b">(29%)</span></td>
+  <td style="color:#ef4444">22.2%</td>
+  <td style="color:#ef4444">23.5%</td>
+  <td style="color:#22c55e">+1.2%</td>
+  <td style="color:#ef4444">$-1,122.05</td>
+  <td style="color:#94a3b8">$57.56</td>
+  <td style="color:#ef4444">0.57</td>
+  <td style="color:#ef4444">-1.85</td>
+  <td class="neg">12.15%</td>
+  <td>2W / 14L</td>
+</tr>
+</tbody>
+<tfoot>
+<tr style="border-top:2px solid #334155;font-weight:700">
+  <td>TONG</td><td>1092</td><td>540</td><td>552</td>
+  <td style="color:#ef4444">29.7%</td>
+  <td style="color:#ef4444">30.3%</td>
+  <td style="color:#22c55e">+0.6%</td>
+  <td style="color:#ef4444">$-4,294.63</td>
+  <td>$775.69</td>
+  <td>—</td>
+  <td style="color:#ef4444">-0.51</td>
+  <td class="neg">12.15%</td>
+  <td>—</td>
+</tr>
+</tfoot>
+</table>
+
+<h3>Thoat lenh</h3>
+<table style="max-width:480px">
+<tr><td>REV (dao chieu)</td><td>1077</td></tr>
+<tr><td>OPEN (mark-to-market cuoi ky)</td><td>15</td></tr>
+</table>
+
+</div>
+
+<h2>So sanh Timeframe</h2>
+<table>
+<thead>
+<tr><th>TF</th><th>Lenh</th><th>Long</th><th>Short</th>
+<th>WR (fee)</th><th>WR (no fee)</th><th>Net P&L</th><th>Fee</th>
+<th>Sharpe TB</th><th>Co lai</th><th>TB Net/coin</th><th>ROI TB</th></tr>
+</thead>
+<tbody>
+<tr>
+  <td><b>M15</b></td><td>4275</td><td>2133</td><td>2142</td>
+  <td style="color:#ef4444">32.1%</td>
+  <td style="color:#ef4444">32.6%</td>
+  <td style="color:#ef4444">$-4,966.14</td>
+  <td>$3,048.25</td>
+  <td style="color:#ef4444">-0.49</td>
+  <td>4/15</td>
+  <td style="color:#ef4444">$-331.08</td>
+  <td style="color:#ef4444">-3.31%</td>
+</tr><tr>
+  <td><b>H1</b></td><td>1092</td><td>540</td><td>552</td>
+  <td style="color:#ef4444">29.7%</td>
+  <td style="color:#ef4444">30.3%</td>
+  <td style="color:#ef4444">$-4,294.63</td>
+  <td>$775.69</td>
+  <td style="color:#ef4444">-0.51</td>
+  <td>3/15</td>
+  <td style="color:#ef4444">$-286.31</td>
+  <td style="color:#ef4444">-2.86%</td>
+</tr>
+</tbody></table>
+
+<script>
+const CHARTS = {"agg_M15": {"eq": [150000.0, 149977.20015835567, 150283.95651290932, 150528.3083373075, 150709.90437510714, 150743.37354005603, 150782.75268280157, 150703.74684624188, 151113.47187838217, 151535.63991548956, 151896.6843843445, 151698.57255065656, 151300.87231946393, 151295.8470911697, 151375.48924727942, 151155.80658475385, 151368.56724994435, 151814.41423684068, 151698.72351505843, 151997.35300953386, 152189.12662071208, 152155.35548483898, 152212.61262247694, 152240.8162964419, 152615.59912631952, 152423.6651924495, 152333.06209267417, 152025.43850077182, 151737.00772287988, 152100.0449737418, 152023.30905773118, 152082.1595592557, 151896.9163241767, 151963.93919537618, 152476.33363460188, 152628.48892083947, 152580.03941309464, 152456.08248782522, 152393.47868098554, 152367.62683621055, 152505.15159180295, 152460.80420460875, 152378.96544818903, 152211.94779528896, 152292.15972768347, 152291.8201225047, 152334.15297811374, 152451.3266430505, 152497.5590016971, 152437.87220328645, 152329.82116936534, 152298.51358309746, 152288.77976384864, 152196.70947967647, 152129.97529239726, 152233.34829165036, 152235.64626005653, 152625.19967703306, 152426.15397331453, 152277.179562208, 152737.79471074344, 152900.49728127645, 153053.77832042484, 153436.17598253998, 153431.20131092318, 153384.01554829464, 153161.1535899402, 152999.36745881563, 153026.3264500072, 153330.97532057395, 153337.41317161324, 153391.81219737793, 153277.1255894918, 153648.74114615907, 154172.8961778521, 154062.57191035224, 153830.4559725376, 153561.64586287798, 153672.80447870566, 153962.59431722638, 154157.93216020812, 154166.94892869343, 154097.0844743201, 153884.2853421487, 153701.7395164135, 153740.3175517576, 153634.116873013, 153611.02782998237, 153594.37069405368, 153561.1591202758, 153834.56498999888, 153995.29529051777, 153834.90738402805, 153574.11170066832, 153343.58270681917, 153042.38340712019, 152892.4165240476, 152857.58741427853, 152848.87969253576, 153072.5594140004, 152953.4635833435, 152730.46910801492, 152668.27437223532, 152507.46578844145, 152084.85434398946, 151776.36942668457, 152575.9552152812, 153625.52086173394, 153495.75705035782, 153298.30344979276, 153065.9436148738, 152922.350567869, 153593.27994253868, 153982.769161372, 153928.4228758847, 153666.5110007173, 153718.16278625172, 153730.06898660556, 153342.4984639163, 153039.9915167469, 152539.0288323912, 152514.7438872105, 152483.42308075196, 152384.20615851917, 152371.87366271004, 152388.11445055078, 152363.73845487626, 152564.54715516898, 152495.43136461798, 152709.20689470394, 152660.32432358674, 152492.84696695957, 152550.59145335652, 152428.27768317395, 152106.99275789206, 152037.58347150445, 152263.61510119608, 152512.33975026483, 152367.24561265763, 152276.28140412158, 152314.04182743817, 152922.6736233987, 153601.143041539, 153926.1674294382, 153763.80499327756, 153456.76976165024, 153281.40332058718, 153873.65060531057, 154569.39870074354, 154348.7218278088, 154139.93972260336, 154131.94030484575, 154187.2797188992, 153907.66633332742, 154161.19869507226, 153785.51027529102, 153632.67224180847, 153365.01226795727, 153708.0835975555, 153546.80957426698, 153361.20260777455, 153484.70360891314, 153105.05339628228, 152760.4423074071, 152721.78596780042, 152426.03848456874, 152340.0712901963, 152147.93798572625, 152021.92879081686, 151428.75599351188, 151525.56089301044, 151629.30528245404, 151911.2169513512, 151785.91113988974, 151574.8336020784, 151596.96495108714, 151594.3663090232, 151493.52748959285, 151454.5875704203, 151349.28900909337, 151387.7394750332, 151386.61791534373, 151231.21907743142, 151341.19797261755, 151058.81671417534, 151360.583466945, 151696.22135248437, 152350.71571535664, 152951.72390757123, 153392.8786408512, 153796.13076761283, 153525.7197853718, 153201.08553498966, 152884.63811770745, 152599.7750938186, 152592.8296311662, 152489.3910698053, 152402.30341213383, 152222.6565899949, 151773.02725300117, 151392.92198516574, 151449.95966647167, 151059.1162412393, 150686.0351120041, 150728.65482192775, 150797.37752547208, 150418.31697473803, 150153.50715516988, 149986.28539756918, 149908.15954183298, 149854.7503665832, 149493.11173629013, 149745.0173718629, 150032.49909742744, 149871.4363541354, 149713.66106517267, 149297.86269569254, 149044.31278495636, 149061.12413300932, 148758.02261727036, 148449.60997490116, 148269.8719756691, 148169.3566471628, 148289.74179368964, 148243.93919431546, 148139.56141250712, 148017.35930276304, 147906.59337367574, 147838.07305909207, 147723.89837805508, 147746.5149074402, 147618.15589956407, 147490.69579053525, 147291.80521919252, 146971.97949277735, 146784.03777029534, 146585.03234837975, 146469.39865734414, 146347.99209835177, 146297.55230189388, 146422.37368376297, 146312.30005162026, 146127.91838742257, 145960.58950100848, 145899.91913472817, 145869.67584694474, 145767.8857386298, 145642.6496362366, 145692.84183558438, 146282.48735760036, 146261.4683479104, 146783.24468785428, 146767.6044050494, 146652.70306851188, 147025.8221392098, 146790.8455298279, 146570.77673517758, 146484.39436385527, 146687.76597873744, 146641.11728642232, 146541.1219137982, 146363.45155414403, 146279.67791090402, 146233.99654233136, 146204.92009833676, 145979.74593089498, 145864.26221680286, 145807.58887077635, 145771.82052114807, 146021.16697627486, 146402.88837461505, 146465.26251617237, 146612.1555742885, 146893.51673961792, 146889.29213028649, 146845.5845682242, 146839.35624820134, 146737.32145072293, 147218.21911396921, 147005.3027368592, 146683.4573434033, 146619.22196549244, 146438.76701112583, 146439.1561982324, 146353.63747809659, 146141.6967788471, 145987.05356645942, 146113.74628356303, 146226.26633644334, 146118.83215070836, 145887.4802333076, 145737.84203569507, 145610.44234767533, 145454.97059036166, 145551.51565136848, 146628.12905998755, 147878.321001631, 147784.03837022354, 147665.6390863196, 148090.59596868494, 148990.0644426906, 149125.28906579802, 149050.2429964685, 148857.64520995252, 148832.1660633099, 149024.19746192952, 149400.7415114787, 149226.47203479742, 149124.5486784807, 149023.43106924646, 149330.12786929848, 149721.86840307474, 149932.69934644218, 149923.77142714174, 149835.39409941688, 149747.6209198389, 149614.59994972535, 149486.8423654781, 149388.75156696932, 149228.18696908446, 149152.84324457822, 149258.19039134306, 149491.9946427543, 149577.82306114375, 149756.71615811286, 150048.44734381474, 149963.50582236538, 150034.36831953612, 149966.00121763145, 150521.51632761207, 151066.15809944735, 150774.2083044717, 150834.064215749, 150663.1426273305, 150340.71550924686, 149941.07606241864, 149397.69348817863, 148958.48521177808, 148609.9247958122, 148525.82746649018, 148395.58853239322, 148397.38835996174, 148389.90341722866, 148583.64019404416, 148543.7730268041, 148494.16290741062, 148581.18473003127, 149101.15677295087, 149294.16820440136, 149301.51553079995, 149104.70816592217, 149053.39960881055, 148946.75270966708, 148814.57588904633, 148768.41579453193, 148875.08015005663, 148804.38626866683, 148737.83453100902, 148783.8934635164, 148980.7832067556, 149362.00606058122, 149460.12526816528, 149385.32618068656, 149145.3575879315, 149264.15824473734, 149412.25491084592, 149311.94737691476, 149251.3246826314, 148989.14001427742, 149218.34220518984, 149168.17519186178, 149195.14718411185, 149146.98132476263, 149072.86311875773, 149121.53515989898, 149283.0920299338, 149731.99355505762, 149670.59591468773, 149583.27811399737, 149453.13469813377, 149414.25566085323, 149376.0656100302, 149263.44345523108, 149166.16144144765, 149167.04332554468, 148933.97754082226, 148900.4871699786, 148888.35815916018, 148959.90677539312, 148952.5463185492, 148813.87958454742, 148724.09168451923, 148499.10962583686, 148384.73318428054, 148328.3461831337, 148120.06987781753, 147990.82128059748, 148068.49300787572, 148233.6395541029, 148148.45969898105, 148088.24492845128, 148076.04322462907, 147839.58628920282, 147709.9298078312, 147426.04623199927, 147433.73017218828, 147424.76298883907, 147522.28281144935, 147490.80954579852, 147394.85508425857, 147265.93601116532, 147455.01324627886, 147870.08522869935, 148378.5024605772, 148561.0369237514, 148575.11341282094, 148512.7880352238, 148418.62786994167, 148327.8598582469, 148364.92271115514, 148277.48312962806, 148228.6179978279, 148156.55708475495, 148131.24845690103, 148057.95216920416, 147936.57168495847, 147842.85561516395, 147736.59821077157, 147732.0871340694, 147663.8838904516, 147658.43818997906, 147613.40865789913, 147409.6803666993, 147242.17660362905, 147228.15674157636, 147151.55848920005, 147103.37400470537, 147049.92557601433, 146925.93614979612, 146828.13614362842, 146758.48404600425, 146772.22354750364, 146684.19998993955, 146528.97235764738, 146414.44578342576, 146437.09182380218, 146299.1872607617, 146203.62028636553, 146268.39202354653, 146253.03020692026, 146313.02721369348, 146465.50905635237, 146350.72786075814, 146800.54714556626, 147071.77400960663, 146937.01145380572, 146752.218683636, 147060.56839541698, 146982.00147326908, 146869.52923506897, 146731.57773096501, 146582.7308252866, 146354.91802110666, 146429.15463574903, 146302.98494738888, 146103.2744081426, 146146.1851999518, 146535.40330097094, 146617.8948221136, 146380.03215071818, 146424.72430224714, 146389.1751230664, 146314.58006444806, 146183.44943509495, 146051.0794428629, 145888.66282813213, 145825.5930809243, 145753.2040936055, 146092.57008594004, 145724.9300105441, 145674.50179403785, 145297.37024850672, 145107.51682377936, 144996.75194391567, 144776.3402173662, 144903.1034178831, 144847.69696120566, 144685.34370095748, 144502.21483755234, 144712.12396437288, 144650.70574328513, 144444.40707704518, 144345.2958114691, 144196.1293312971, 144280.99120287932, 144303.57911412735, 144150.09061385397, 144034.59912070274, 143904.46232918496, 144087.38771099725], "start": 150000.0}, "coin_M15_ENA": {"eq": [10000.0, 9936.251756852973, 9890.677689203943, 9909.606042640129, 9993.08944124528, 10014.319607664544, 10061.312010531323, 10034.836362374233, 10264.230048079553, 10224.088712237717, 10201.41666867409, 10268.606449978983, 10239.365822438263, 10242.117102332957, 10233.619452722278, 10312.670465754789, 10289.427584378209, 10278.27209520544, 10413.340624190949, 10541.897679437317, 10505.654668681276, 10480.525943127695, 10507.728764049121, 10495.959398891791, 10479.91764073178, 10482.751005980006, 10581.336217801141, 10617.510822164266, 10686.186041074101, 10660.59297930859, 10636.820547441925, 10621.224752300666, 10700.49832424795, 10682.968461341712, 10654.95585872109, 10681.4453223998, 10661.455172923937, 10666.681535156717, 10638.365551352124, 10668.92551080605, 10647.64388425588, 10679.74735130624, 10665.203122356523, 10644.87132027476, 10613.690319535006, 10686.556675707752, 10668.718170354434, 10693.821998073556, 10661.638073937997, 10633.916211771033, 10627.151104022849, 10610.945234699724, 10582.653694775117, 10587.051651250888, 10663.178788693325, 10640.74651171964, 10576.951369414424, 10543.751549311331, 10485.47780925475, 10493.949499524924, 10472.212887869247, 10460.207765713776, 10400.10903304051, 10631.82247763381, 10692.667146544307, 10654.598340766946, 10605.226146291057, 10614.034821207764, 10692.34113523948, 10623.466538045092, 10594.828385032792, 10604.626392967597, 10560.148221749565, 10529.278401033336, 10470.059442177451, 10386.352515091683, 10392.32581181158, 10390.539617813723, 10463.460990832995, 10660.663652978987, 10630.372945619463, 10798.563701704526, 10782.442133887018, 10753.227042152515, 10710.214601665453, 10690.103978334238, 10747.367402094762, 10713.04282207708, 10678.978884523614, 10697.445770954293, 10622.1719321573, 10705.335769661362, 10617.742544758914, 10566.894103033972, 10560.262867369895, 10551.730669751732, 10491.584423444494, 10546.642191799421, 10680.59943171626, 10649.093937395997, 10664.371382472427, 10667.157581912596, 10649.946664426641, 10634.232666568734, 10616.28950476782, 10711.171538769251, 10839.418210712267, 10917.596718598703, 10891.39714744193, 10823.49790573947, 10828.636188212942, 10825.73879716165, 10800.351213132612, 10746.399010304178, 10689.874553060361, 10693.653174317846, 10632.434466423108, 10738.60134637509, 10691.308998704839, 10700.466942783785, 10651.834602489527, 10617.708878162508, 10613.619334988363, 10578.042941958354, 10537.118793221216, 10569.555025190028, 10572.367991419866, 10521.410043654923, 10524.998667758224, 10517.139260615366, 10508.862949504255, 10470.498543120262, 10426.182116582155, 10407.698933192813, 10395.196690268283, 10418.357559003367, 10607.795699345665, 10565.571404768836, 10540.802878930572, 10496.823640854582, 10462.413809393907, 10452.875489425984, 10433.48771319387, 10484.63507244863, 10473.672703375583, 10462.165036996645, 10431.999556637977, 10444.048580395125, 10503.02805722222, 10574.248896162506, 10558.134868070072, 10730.515314457554, 10702.543380679035, 10742.46173022137, 10732.806379595251, 10684.542317621725, 10668.325525548204, 10853.208681907598, 10828.148075890405, 10803.93082772594, 10801.782619691507, 10791.007557909898, 10734.125850228533, 10805.027460627929, 10812.42744601754, 10799.631839737347, 10773.469489697569, 10837.26830847308, 10842.660330288089, 10835.005431762504, 10899.728871900315, 10897.397479822708, 10870.0586057307, 10864.367705233186, 10836.435702757939, 10886.6304559386, 10870.729743695527, 10852.768209212769, 10838.67807629573, 10941.979496729726, 10913.021294913378, 10883.221110074333, 10958.161222082406, 10954.631958480155, 10897.810774195777, 10838.602162699246, 10809.808303148684, 10767.653695248877, 10770.638651770616, 10743.186999236053, 10786.44293370643, 10906.150240671177, 10893.710223075868, 10855.396256705937, 10840.388028869902, 10815.487447631991, 10839.316146404419, 10833.07021829382, 10892.829580346983, 10883.469452429956, 10866.480202215731, 10945.062793679146, 10903.68214372645, 10971.039773903965, 11015.812174962166, 11076.861107148401, 11047.031291614421, 11022.975628281089, 11003.810020246343, 10971.004921795016, 10940.290917507771, 11033.533099828213, 10999.904025437969, 10975.221824933555, 10964.659125426166, 10921.64147119731, 10997.272521316641, 10993.23139160489, 11027.86388442257, 10996.1889954151, 10952.012256284665, 10935.058694596353, 10946.055102477078, 10912.171370371814, 11166.07861336723, 11245.21446566118, 11201.363735428211, 11176.293538065856, 11151.999231412394, 11141.599893929682, 11123.175323884021, 11103.581399097855, 11088.546388877945, 11104.59452709309, 11100.586345283467, 11077.287296823237, 11048.223144305915, 11060.919520518122, 11046.044633845673, 11033.791814099828, 11014.240320381236, 10998.845615860404, 10976.687129061724, 10966.446864603833, 10950.114977505475, 10902.069252809926, 11034.170954487394, 10996.59372329103, 11046.575672252406, 11040.608426750823, 11018.852544443072, 11035.723098158838, 10979.433450902668, 10985.403727566798, 10984.008771844727, 11066.828331831093, 11053.753554683455, 11060.38473457614, 11037.962034054566, 11009.805126823081, 10993.340548372284, 10963.37914758624, 10951.772139204011, 10940.319843723784, 10930.758621346293, 10922.710487875102, 10908.1915831443, 10913.62984021687, 10854.768289474296, 10826.145815603883, 10783.2598373366, 10869.435161977257, 10845.118167823895, 10821.365084452178, 10794.095957482345, 10779.153938171521, 10735.928612324982, 10600.253373815813, 10774.48476506542], "start": 10000.0}, "coin_M15_BNB": {"eq": [10000.0, 10039.3770582795, 10047.987837736338, 10039.81164100269, 10086.481350636144, 10052.423786149882, 10018.060738588494, 10002.192473189036, 9990.484707522572, 9973.378166512162, 10001.595741691131, 9982.509153226289, 9968.60480907676, 9963.103388836644, 9957.26192391441, 9968.18219299897, 9980.264257795421, 9967.726043753837, 9941.616468595497, 9934.281095812865, 9941.813397639655, 9932.203012433214, 9976.522527770998, 9991.941684962536, 9965.506157431473, 9962.11615081424, 9961.69458089849, 9946.99652971992, 9937.552375693616, 9933.927755138002, 9923.446201426283, 9909.789728843049, 9901.824312622768, 9892.331774246393, 9877.9675388517, 9875.519472676178, 9868.096537696581, 9865.604449730294, 9864.984418803428, 9859.768859317104, 9851.840639409507, 9849.19376460096, 9880.852202008358, 9877.76822779541, 9870.284226113668, 9859.029671507682, 9913.52130673507, 9914.932369080174, 9936.98222928725, 9917.255273386192, 9930.298159567654, 9912.085114263438, 9899.573911199072, 9885.313663263682, 9936.066115323674, 9967.680227524772, 9961.570652985278, 10013.317924976122, 10020.785604360506, 10011.702577609834, 10029.52134243622, 9993.04437848811, 10108.372241763027, 10079.906082382073, 10156.073378285239, 10156.192838757155, 10112.463992863512, 10147.619760508394, 10096.211089578717, 10078.075747536324, 10188.931292191555, 10328.632072571472, 10334.022297381398, 10314.414053166096, 10309.907418524543, 10329.147348045819, 10362.665485410942, 10366.888588116008, 10385.87229629388, 10409.944392790585, 10401.990653541334, 10383.47301992546, 10351.056188779003, 10348.138210838571, 10343.488825676961, 10338.682498121323, 10334.612849928042, 10450.312386460966, 10436.048080854065, 10412.480034061276, 10431.300132449758, 10417.059148804257, 10403.358611037698, 10421.89239743916, 10389.496073559767, 10392.78003808248, 10374.498524548088, 10359.123677602069, 10352.62125713517, 10356.542299799152, 10353.980028441274, 10445.393703341846, 10456.388974107422, 10442.40792318155, 10423.729677129828, 10392.628828509147, 10366.435093127913, 10341.290277011942, 10367.489385919735, 10356.32101344352, 10343.805525154285, 10336.126699529257, 10289.218538089397, 10304.926991928762, 10372.530302481526, 10374.303415033603, 10355.64365151053, 10320.528834599783, 10313.903971250276, 10307.57336219353, 10300.979694358619, 10279.528064677914, 10246.030313901609, 10222.102252778044, 10188.404689115858, 10179.638540756452, 10173.618160548413, 10158.512904414158, 10156.87018014229, 10184.299101289565, 10175.875505617243, 10191.25786861463, 10172.744108973586, 10161.819930172884, 10176.392446518043, 10171.98497219904, 10163.706320799429, 10154.281588299988, 10154.955284915832, 10166.25601042316, 10152.871292886519, 10141.321764571338, 10114.50742514575, 10094.219033324513, 10110.311253239797, 10108.438389422061, 10116.907860260557, 10114.27063152434, 10127.318911179871, 10118.859932183052, 10143.764753126705, 10134.928267032601, 10131.610716688438, 10147.821225361622, 10162.960761627959, 10164.884428126168, 10159.303359698506, 10149.675397057372, 10181.962941706008, 10179.389621071728, 10171.034889133512, 10167.745403736964, 10176.490033919492, 10170.81315996317, 10129.780390124819, 10112.719864563074, 10104.341145459046, 10136.846449404873, 10137.501392988745, 10152.37416835025, 10175.222694084707, 10218.923253957884, 10192.979320850398, 10277.89141654972, 10271.602373957901, 10404.878952599036, 10368.311274275131, 10347.896658237129, 10326.288013110174, 10358.46691000797, 10341.809822281526, 10323.640706347414, 10347.649812157792, 10350.77973463989, 10327.997329153493, 10313.130410324442, 10307.949988691526, 10299.98468435844, 10281.950652895568, 10263.158108514554, 10249.95217445707, 10262.513946318584, 10285.024141632626, 10323.322666161414, 10308.50140782613, 10287.83523808969, 10323.823684862115, 10320.414083283826, 10311.336944003024, 10269.02141561987, 10238.53595425296, 10228.78383430915, 10259.144606425203, 10302.971410911448, 10331.424032043524, 10319.05075040151, 10317.766309910447, 10308.25314491554, 10309.328263054804, 10301.465473548169, 10325.652749364232, 10325.841438373107, 10304.776098776725, 10330.883834433578, 10320.094227864234, 10310.026550137183, 10284.032864093382, 10253.281035501452, 10234.150563592731, 10227.583016489281, 10235.239345494832, 10282.156948623526, 10282.928229507175, 10279.71892290594, 10268.87681119672, 10250.64296362743, 10239.824875047836, 10282.188214992704, 10300.251493292259, 10281.461474620372, 10274.669019592351, 10267.851550074005, 10254.70115527056, 10238.58833972414, 10214.413464281633, 10208.528445954566, 10233.918794648882, 10223.975387935136, 10222.29435022332, 10209.455887124373, 10220.282237476767, 10230.291191542154, 10232.253185423411, 10225.657163842507, 10234.213740829993, 10233.139579112478, 10224.964155912778, 10219.408370625291, 10216.92206519351, 10214.006817531501, 10209.075576074856, 10211.74893165176, 10201.129968536035, 10201.070610638442, 10192.7568267666, 10198.563219218518, 10196.148870684581, 10193.795340347868, 10190.328216704671, 10183.61753509768, 10193.073500216775, 10186.44259365455, 10216.230215585421, 10214.760297735163, 10216.002636703326, 10212.903940451346, 10222.558153720034, 10211.65100017876, 10221.546082120343, 10211.44290085928, 10200.593999827744, 10225.27166130872, 10213.181944764507, 10219.809645808973, 10216.49723061449, 10210.787690040208, 10223.438482322817, 10208.53023795022, 10198.421977053065, 10190.445414222288, 10186.537569898306, 10215.486289995526, 10206.36864099274, 10187.697774050317, 10294.423924023951, 10424.134017542885], "start": 10000.0}, "coin_M15_SUI": {"eq": [10000.0, 10030.72330753273, 10024.685593726652, 10018.178919484668, 10150.124038275351, 10134.4118374427, 10108.39169340284, 10089.54714286454, 10036.588582879755, 10027.416488696632, 10083.434682302362, 10144.983982987793, 10137.123940658475, 10184.157746661225, 10154.711052044511, 10111.413775468618, 10140.500643470185, 10126.393856130406, 10116.786282799216, 10090.78273852451, 10059.515304004466, 10129.036646269366, 10138.237186263514, 10177.892180179908, 10166.646410361638, 10182.932100662763, 10206.138794424402, 10194.478509771012, 10197.121430375473, 10189.890641408225, 10210.397018612666, 10199.038757136375, 10280.221695375307, 10334.43144653853, 10338.638887066298, 10299.92246694928, 10322.259730906342, 10351.741306394702, 10342.494961553994, 10416.079560912442, 10400.710643542383, 10374.408912643676, 10338.743589440955, 10357.351353653783, 10347.38139995008, 10333.003285643825, 10336.080716078608, 10336.811030857583, 10427.708933183309, 10410.926073383393, 10389.972456409325, 10358.391106657025, 10344.692590962943, 10371.755461643483, 10355.135969770772, 10345.898513884998, 10299.267980365204, 10464.715793469653, 10455.234266432832, 10417.102891259157, 10370.62227310105, 10471.998337036928, 10520.87380098329, 10477.584745059788, 10411.901277443354, 10430.933811454772, 10416.64962595668, 10382.870441564528, 10377.650464343938, 10359.667313788046, 10388.43169809772, 10355.66487575368, 10337.1895820827, 10336.437486306013, 10325.064688133889, 10348.416243368685, 10310.68134898888, 10334.673085841763, 10313.767245964385, 10434.603567197028, 10405.895466499365, 10411.658706523458, 10466.64876982547, 10459.42433521763, 10468.833663273543, 10520.807203657614, 10469.582102599334, 10565.658269684629, 10499.2125736647, 10462.76710696496, 10443.37937830971, 10435.768469157789, 10345.526967854996, 10425.573902364147, 10398.153540722096, 10347.432852929192, 10400.33059582682, 10348.697402107078, 10334.935403386751, 10319.824044942667, 10294.25792460011, 10286.06976691234, 10211.286460576144, 10246.55804225253, 10477.158561966837, 10536.480191583314, 10549.424580388251, 10543.428864443162, 10522.146332621609, 10475.614454759014, 10445.834403845098, 10386.696323074671, 10336.92441007203, 10332.011121473968, 10283.057141453068, 10245.900734270534, 10236.15344030319, 10283.000593186656, 10252.584424153973, 10282.98053977153, 10249.40848920263, 10209.17421265942, 10225.500375576843, 10220.732174244242, 10203.53640897093, 10217.017792109493, 10209.179607590724, 10201.711722650067, 10195.634679589217, 10191.796782641026, 10168.591876032848, 10145.142489669211, 10160.62935640665, 10127.171586645523, 10103.874782343142, 10106.266623725784, 10076.218508423686, 10062.309068494988, 10243.373922259942, 10187.918462036052, 10231.05488889768, 10236.887303013418, 10215.167140565816, 10216.400117988938, 10241.473654706122, 10236.46720980905, 10222.291278657076, 10234.24557902438, 10219.932881911665, 10359.488473074063, 10343.85247464536, 10380.105010070058, 10369.870600546248, 10578.609832499982, 10561.773979234802, 10678.801747239102, 10676.666934853316, 10652.561097724401, 10621.160659516574, 10684.628629589342, 10679.644990228922, 10661.876949863767, 10719.107001772494, 10709.394594739886, 10683.869275218054, 10669.645363520569, 10655.098665181085, 10633.797336836838, 10607.326164110491, 10625.749246590107, 10636.860928461576, 10702.52831776008, 10675.08649837831, 10637.846190855416, 10689.897958692589, 10686.421128652224, 10617.51114433019, 10541.963707995492, 10493.879276009031, 10477.39238082804, 10517.87486213543, 10506.763450796847, 10491.715417754453, 10549.31866643672, 10609.928338663296, 10578.510416397712, 10566.952970020307, 10543.677638962994, 10543.064776457935, 10517.75929937144, 10548.03739080114, 10553.167269081163, 10517.690613941966, 10543.832505458933, 10530.611434799514, 10553.272689239227, 10563.613864909155, 10564.372834829222, 10565.975260571797, 10634.748017297312, 10603.214984095732, 10586.99789845136, 10581.236934366449, 10571.639588846901, 10557.555877941551, 10551.51034949757, 10554.25253135766, 10543.887677102464, 10532.939588830368, 10504.517734905532, 10532.981415849392, 10522.267106819727, 10523.596486808969, 10489.9095859071, 10437.556195926849, 10429.277023524393, 10439.110763217639, 10417.39895751258, 10457.155480654383, 10495.466452282713, 10476.51771599001, 10455.283021435183, 10439.524930822681, 10425.877583563359, 10421.47291847897, 10416.734189415974, 10411.276549744984, 10409.502624972785, 10396.515277385994, 10397.409223699753, 10385.644109714565, 10374.50746243868, 10346.842829463385, 10345.687121990153, 10343.759829151137, 10336.746630189582, 10343.824336523976, 10334.501599813737, 10323.315046514244, 10311.464131648494, 10314.634754705488, 10299.399443415166, 10332.271753007111, 10307.041210451738, 10280.213025385177, 10273.124705344067, 10360.001973113674, 10338.059740062032, 10509.498308929262, 10485.009254336745, 10431.984790882869, 10565.848691117326, 10535.159408258849, 10514.118431467632, 10489.533768041487, 10448.87126282006, 10472.881115725684, 10461.728765757442, 10452.307386896091, 10444.61562722583, 10433.739729150984, 10445.026740147985, 10405.507722578304, 10391.964950638405, 10356.868445488637, 10446.410747866561, 10418.17081390937, 10410.928657400134, 10403.623604652881, 10390.958436953766, 10361.723796048651, 10425.171322998127, 10415.563060403441], "start": 10000.0}, "coin_M15_SOL": {"eq": [10000.0, 10051.560492422026, 10063.869749584288, 10040.474406011423, 10116.257313574448, 10104.467002884086, 10097.075214678425, 10076.17871856465, 10042.51598403177, 10032.020318110108, 10106.036159466903, 10140.911238754346, 10140.94435609366, 10170.220787865772, 10168.077469893928, 10125.54878969787, 10201.03530806759, 10249.211490050988, 10326.397783740309, 10340.15740104496, 10323.115558548241, 10335.106858721208, 10368.01785101273, 10360.957760601108, 10337.68312506865, 10335.540887918198, 10377.680665805225, 10357.679152817906, 10459.463003664267, 10423.500046912724, 10400.467343034934, 10425.375882242493, 10418.581535624033, 10400.914509048092, 10386.402465703397, 10370.364029475533, 10397.714311395344, 10413.235358774953, 10395.614867979191, 10544.290557767, 10542.434108624144, 10528.48287043889, 10539.793248630169, 10527.480484597761, 10630.8440288621, 10621.961366394133, 10606.001421712732, 10587.168342305986, 10576.015888909054, 10598.28212397072, 10575.30841718375, 10566.636308492052, 10515.653876389946, 10608.144379856561, 10628.212652112532, 10594.808588551254, 10573.088677522937, 10638.212350887732, 10651.290274950741, 10613.59350973428, 10563.14011689559, 10543.769031853994, 10555.647951038363, 10540.326734960345, 10538.002669339729, 10527.085194527072, 10546.04271863587, 10521.878903136223, 10509.667380231691, 10509.003335637433, 10465.705662095683, 10482.994017997828, 10468.95215265203, 10452.512486757008, 10425.518583857767, 10561.10057052153, 10554.338818567912, 10533.772438337124, 10510.685327985866, 10498.647732055819, 10535.58613455849, 10667.388217578731, 10642.51408360276, 10616.809060481786, 10589.496556186794, 10570.55248888876, 10518.56029666779, 10491.098783298807, 10486.624552106678, 10447.921392144435, 10371.403753669445, 10403.4014502859, 10396.820541685855, 10377.995544362177, 10375.272056346095, 10320.231262342377, 10312.392170785319, 10284.951640515928, 10309.025155256792, 10304.863346788057, 10281.446113085547, 10284.750187393394, 10225.940846690528, 10245.954482366038, 10329.844871185525, 10355.126327347345, 10337.124879117355, 10273.36664613247, 10246.273669195789, 10223.389280807474, 10190.625874892923, 10184.034336702558, 10146.169468784918, 10135.973052389983, 10131.204010172436, 10132.451790380612, 10089.884539020273, 10071.969259165406, 10055.054469230543, 10009.317702067305, 9946.022340625157, 9929.209901616467, 9884.561639262967, 9849.295426142782, 9856.504937511878, 9842.679577991661, 9816.884367391065, 9826.62930337305, 9812.834799228058, 9793.99689739161, 9776.141077768541, 9760.525866592507, 9743.356504201978, 9729.858652689076, 9732.155625580643, 9715.203381931588, 9700.677526728328, 9690.565939102802, 9684.959591301133, 9675.373603072478, 9724.589825641006, 9707.048386380844, 9704.91263198306, 9684.101504846627, 9686.105522997714, 9651.007687673418, 9619.69670765358, 9619.055822475975, 9619.072502250845, 9598.557410511747, 9577.366552038748, 9578.26178383167, 9598.999036138686, 9592.044908584374, 9617.47234944229, 9603.837968774282, 9592.296273292002, 9598.723223531104, 9600.52124000465, 9701.8489476359, 9681.835024630549, 9645.29229906129, 9620.16140264117, 9642.536778668085, 9649.828889512231, 9718.979326426263, 9698.284420814236, 9799.93415462405, 9799.802527475784, 9974.114599382625, 9995.505149370863, 10057.64442002679, 10018.01995453072, 9992.255491773598, 10079.756279758143, 10087.63542773661, 10049.850563249549, 10065.819181485902, 10103.890744443443, 10175.084012942385, 10259.507919674857, 10282.009201657365, 10274.492473505503, 10220.868618955677, 10183.519683118253, 10151.388925000216, 10181.802496297469, 10255.217915174224, 10284.581030350539, 10260.140839089878, 10235.81052991389, 10224.80647544282, 10212.989186307102, 10195.070029058945, 10204.704300280477, 10200.23212849086, 10265.616786651231, 10260.965211225699, 10234.616623327003, 10263.385684447177, 10243.180662259818, 10215.256951859817, 10210.316601837565, 10190.824950887843, 10186.164126145575, 10267.619947990983, 10250.956749454515, 10236.096533192173, 10226.37024505658, 10211.701726012427, 10194.006112661547, 10220.197174971392, 10206.73135080931, 10169.140749973232, 10162.930850767369, 10154.84321194673, 10168.75813389795, 10162.75378437872, 10167.776616516452, 10144.824532945364, 10103.771409675217, 10103.29986168685, 10119.670669323214, 10109.061587568953, 10140.43431119416, 10162.138556334796, 10158.384706276316, 10147.343229035583, 10155.683125226944, 10157.616790474354, 10144.79219684334, 10135.782781403022, 10128.70015346372, 10142.680135977127, 10129.19265703723, 10127.879210129273, 10119.741822178621, 10111.422839555235, 10112.504605423497, 10106.528715644657, 10103.556038394092, 10090.322671886344, 10080.783100962271, 10071.158557613102, 10105.982189867369, 10097.421806668552, 10141.018623158514, 10120.100847480795, 10124.678203610374, 10116.48470203076, 10089.021605344235, 10097.977042569022, 10082.194137135772, 10125.098433986685, 10116.443452292004, 10124.436284716281, 10114.594193636909, 10109.861746330671, 10120.558121830789, 10098.66146051607, 10083.824670040965, 10077.330264401304, 10056.860019887918, 10048.875813112627, 10025.011695924217, 10018.934809934224, 9995.003600786222, 9995.988617891644, 9977.660298411756, 9949.474841954558, 9931.91157395552, 9924.33742308606, 9919.975978425395, 10045.52774234141], "start": 10000.0}, "coin_M15_ETH": {"eq": [10000.0, 10045.56873304839, 10090.02610343968, 10103.01137604625, 10276.773430469022, 10260.007856830054, 10231.685587822489, 10204.565765320476, 10185.386934283812, 10157.912273671276, 10207.826332728702, 10184.924095886481, 10140.8404757241, 10132.556713889151, 10111.181849867966, 10128.39004293251, 10112.992689219163, 10087.937429771719, 10176.73977611191, 10157.71139323451, 10136.791566941965, 10178.409177964451, 10172.874681408894, 10194.14838465301, 10191.359568048549, 10194.745204820822, 10202.613157750926, 10199.016919459671, 10175.447612782651, 10179.749188297583, 10177.072894903302, 10170.157471793804, 10164.15388934702, 10158.54978162821, 10157.413732040552, 10148.73899897457, 10214.371417341588, 10232.390298107564, 10208.677745474306, 10180.655618576584, 10184.09894477249, 10200.57309679951, 10191.272018046513, 10249.51923445924, 10236.823656435692, 10226.541487540302, 10199.837199052965, 10236.079025270132, 10255.820154399009, 10250.353894240157, 10271.718827642158, 10233.94530152204, 10285.993651194807, 10274.533076838594, 10263.577067385118, 10248.388605746095, 10260.495260323905, 10278.05280885249, 10255.087504227617, 10270.84015619786, 10223.47058956909, 10253.86630093024, 10270.30250366473, 10269.298095230279, 10246.040302850153, 10236.355722395747, 10194.457558045384, 10202.737792291748, 10227.545994465423, 10198.256458758751, 10162.366272067411, 10169.992033983133, 10182.200918620734, 10175.49941048791, 10214.142011788203, 10279.921345696977, 10285.52746732452, 10406.663786568528, 10390.472532097232, 10375.202192492578, 10370.093066725814, 10348.252541529047, 10371.987469184949, 10364.86228876569, 10321.033263310283, 10299.551064761505, 10276.875702751606, 10323.018981617139, 10303.410800456148, 10292.898261103996, 10235.320016125104, 10205.692067262296, 10192.297381774451, 10291.873592329608, 10284.310339599804, 10260.86178313412, 10252.462612807902, 10224.02908180001, 10203.184378611686, 10186.248913986146, 10207.104204911788, 10185.70538761981, 10197.367936046487, 10185.349300409305, 10178.421513307518, 10166.654815241629, 10150.748602690963, 10148.609995745488, 10116.498658215709, 10146.215803936699, 10239.42257998323, 10249.054958704073, 10208.489959190993, 10148.821674728744, 10143.911463088294, 10133.885388863593, 10123.689645537721, 10111.81370079804, 10170.978057961423, 10156.006823537564, 10125.147447412983, 10135.490044130569, 10085.496451053048, 10072.400181997673, 10063.82862778596, 10048.914974173427, 10011.27542103242, 10030.20772013064, 10018.893543907086, 9984.638669742313, 9926.382399024831, 9884.409750304567, 9829.96637717986, 9791.127329759027, 9812.450009360604, 9820.257757067042, 9809.389006506737, 9795.04372759685, 9781.820297298551, 9763.900080213461, 9744.69210961454, 9740.295372137034, 9740.977688462694, 9728.230801194517, 9714.752820918522, 9697.883872847822, 9741.509350796137, 9725.675332709412, 9745.034014641666, 9724.967107317956, 9698.886962474819, 9730.42680323923, 9733.985692811983, 9725.28400119671, 9772.369706374466, 9755.853683846497, 9752.924509801776, 9759.954821242798, 9729.258252569916, 9783.311183194293, 9754.797494299311, 9734.866122347885, 9720.24579029356, 9724.337443108478, 9728.455638411795, 9925.573571995523, 9882.283659339551, 10002.583285406912, 10029.153845137926, 9997.151109503333, 9944.848576007727, 9958.188160824906, 9925.672253029798, 9896.657594275855, 9948.380355134273, 9996.048543577053, 9995.015303189368, 9989.284554175627, 9972.425885216651, 9947.662030264293, 9934.948469599049, 9937.215932914287, 9939.500338463826, 9997.679782944315, 10089.158024978826, 10122.395983711567, 10097.083409299954, 10017.663588691465, 9970.956437675848, 9963.741162568676, 10034.685290061414, 10098.78535733216, 10119.387533618898, 10098.172633994021, 10086.231796788094, 10077.884098602895, 10087.729946983885, 10077.899774174684, 10183.744311642016, 10180.667721063195, 10156.494690643116, 10213.211881711783, 10203.24594158412, 10187.631665309695, 10146.992762066986, 10105.735893118957, 10095.657968827652, 10082.972290541888, 10077.347256805251, 10147.368485100413, 10149.01706832609, 10134.780543613579, 10137.885021419068, 10121.949275971932, 10127.926572786628, 10136.59395347134, 10128.738745972576, 10121.452483405472, 10111.02661785754, 10082.978102058576, 10085.0249935726, 10065.799875500496, 10096.726678133733, 10092.362434379036, 10089.190946355111, 10082.496888050002, 10120.300343497727, 10106.592669833746, 10086.02607643598, 10059.107619418795, 10060.06674738233, 10081.188637911047, 10078.88838454881, 10067.913822660013, 10077.649741317544, 10091.404189236959, 10087.177946374019, 10077.49442756641, 10071.45034863418, 10073.486669788988, 10057.38788907444, 10061.238175361412, 10055.443436987034, 10050.600317063374, 10088.689644618184, 10075.780944526277, 10065.50699452901, 10039.165459208229, 10014.143779161219, 10033.027733892908, 10038.796301097314, 10033.386919823995, 10021.00192186469, 10024.271768974186, 10004.250902279995, 10001.9852807494, 9994.176500761701, 10019.893855249506, 9994.105045025583, 9990.32874684916, 9978.84345783025, 9968.695700053608, 9958.221016566444, 9944.574468248826, 9938.385250605974, 9936.825111804148, 9921.41593213121, 9913.394315093814, 9899.916943030934, 9934.871429479734, 9920.378430915765, 9891.993641496443, 9875.199291029452, 9876.239918523423, 9861.065096418117, 9942.372324352515], "start": 10000.0}, "coin_M15_AVAX": {"eq": [10000.0, 10035.515779496662, 10063.10371290487, 10051.372765876564, 10040.894517992156, 10032.632026606183, 10122.298562225402, 10108.298344467117, 10090.236517803172, 10078.839295322392, 10036.285126997418, 10005.179230498963, 9993.599545716354, 9932.192756486427, 9876.04444118792, 9858.303982478106, 9850.526389378932, 9880.994186082915, 9865.551769029651, 9822.184015443741, 9889.311143982315, 9853.773846425733, 9822.231184640437, 9893.188865688384, 9919.676321759376, 9899.261547234319, 9860.295799432672, 9865.22008412706, 9856.825239814174, 9830.968984673274, 9810.078931057624, 9815.55948343978, 9867.556397817534, 9859.10892447239, 9828.678830817284, 9821.16780788037, 9998.92498032096, 9962.76416637635, 9964.328554980339, 9950.801903039062, 9928.369449165986, 9895.883613841293, 10005.241854935211, 10037.809217923277, 10066.652424227002, 10042.037189652157, 9993.860164292877, 10113.252170030408, 10094.225521406934, 10056.66829048091, 10050.465283735834, 10030.65854933687, 10054.115710468604, 10042.360675136839, 10029.313375414598, 10007.237926068621, 9976.342280085206, 9957.596093819111, 9928.743226131992, 9906.632107972622, 9890.927871865595, 9929.630923805893, 9894.711889174307, 9873.540837084642, 9858.04740443916, 9850.254316106597, 9809.51223835236, 9968.827392806857, 9939.442106517065, 10039.746936198788, 10036.877452847068, 10002.230040364027, 9990.049347061802, 9968.283483751742, 9919.286620947158, 9931.17642062332, 9912.942798505866, 9889.53135979316, 9873.216260287882, 9867.941283343682, 9867.227283343682, 9861.921413056405, 9911.605268380361, 9931.181989543606, 9893.763711768599, 9868.078347430726, 9849.079734930094, 9897.43363451319, 9885.357595651965, 9983.33205037659, 9973.510515755599, 9955.56589683933, 9999.909622901398, 9992.735380498123, 10009.717724640203, 10035.245920204265, 9981.307778511584, 10034.530105738793, 10018.976949291136, 9993.162272469857, 9928.241637651681, 9916.186341244087, 9874.900660868614, 9864.680910534273, 9858.390879297347, 9845.191705689158, 9794.149418916304, 9825.022568409486, 9942.63980304804, 10061.278927475727, 10154.415203010894, 10219.002673377123, 10194.220702239094, 10147.290392784604, 10140.500203183725, 10130.867606293068, 10120.006058129773, 10076.558790976165, 10084.473988315725, 10135.619954853782, 10094.449849423181, 10072.832406829304, 10069.8533547145, 10069.669445479072, 10017.470386022887, 10032.652820024325, 10017.581727278462, 9987.384907981517, 9937.4281980255, 9911.808346229722, 9866.875423209614, 9842.625632551877, 9864.302964850534, 9857.02224949811, 9844.003195858264, 9828.262373969852, 9818.200598315274, 9823.316471663382, 9808.736881835113, 9788.424461038061, 9776.464682502998, 9751.65770600603, 9736.919033311196, 9711.191994324521, 9716.25349552818, 9689.361332451748, 9664.631651608956, 9662.244147506352, 9651.115543323116, 9652.170236885762, 9772.578748358268, 9767.48288874316, 9799.930707002972, 9831.129002138257, 9815.69545546206, 9792.26586194784, 9765.243601112203, 9756.22123028312, 9740.62815094786, 9721.644465382362, 9696.088800396408, 9682.443608566005, 9745.077509608811, 9804.527622144815, 9794.11259923347, 9855.312825581834, 9843.214264240332, 9861.812789146981, 9829.51577148658, 9776.08093243689, 9745.260074760476, 9738.234932687556, 9723.684480155394, 9749.895544719464, 9739.258056597964, 9719.598226021222, 9723.340162017857, 9879.929222053024, 9864.91332518268, 9944.1593192357, 9939.174276619573, 9925.47291541372, 9905.975572413829, 9937.263251957775, 9944.436658132732, 9933.848473993863, 9979.067963152385, 9990.280883345726, 9973.049247080915, 9961.388486497295, 9954.225881970726, 9973.987990917572, 9992.478457044974, 10040.94426546649, 10113.470976804307, 10125.075047445915, 10102.824556741627, 10053.138122853174, 10016.315547786578, 10000.783082387507, 10027.292475633694, 10075.800707659146, 10057.916841275028, 10029.049353304079, 10077.545152200326, 10064.518742248716, 10070.245339359804, 10058.892540082572, 10108.017708860667, 10102.046869818238, 10095.236305539438, 10165.551842210325, 10158.759073705398, 10161.738374865736, 10156.685003452289, 10137.461633184317, 10133.512204806786, 10210.651483428343, 10199.94559519572, 10187.754346457767, 10186.586787927821, 10175.88284058329, 10166.969521594527, 10172.261970104779, 10179.637171495251, 10154.946271099547, 10125.756186965727, 10081.044214582502, 10082.615485973749, 10088.420593174791, 10089.783035396284, 10071.934402077497, 10064.679779638367, 10029.511678688248, 9977.04703387038, 9969.175829137303, 9987.25293252528, 9982.246475970893, 9985.483212031564, 9964.972807946024, 9959.56564832161, 9988.631668028109, 9994.07363723727, 9983.69227655865, 9975.217568380409, 9968.499281992414, 9962.886115361262, 9950.39060893728, 9931.799395498127, 9940.139375457184, 9936.708068183072, 9925.414627603046, 9908.307733439706, 9906.057592384534, 9899.541261971654, 9889.350427646912, 9882.418656913607, 9874.454897168356, 9864.804810173915, 9858.919016201855, 9846.937427123283, 9832.051241622452, 9831.882719631838, 9818.947953488732, 9839.131662755974, 9822.7903843097, 9814.284529705667, 9810.846188865613, 9837.804328738172, 9821.83788413561, 9831.932999474016, 9827.75104236229, 9814.70307977222, 9816.988351209358, 9782.004312516496, 9765.611061219008, 9760.810630968625, 9803.416349183093, 9798.735086392146, 9802.868821154152, 9789.9310727503, 9780.011333486496, 9803.496246751802, 9798.64722576611, 9774.509038939004, 9756.603430313842, 9729.971579713481, 9722.16439710194, 9702.393078211126, 9714.05098457155, 9698.919056686935, 9680.274664627945, 9668.308692823643, 9662.295236218593, 9654.183945266694, 9744.88402106021], "start": 10000.0}, "coin_M15_APT": {"eq": [10000.0, 10016.529511452696, 10024.57036553382, 10023.99758575875, 10021.095925767222, 10018.40022664216, 10010.863046139888, 9990.827981727725, 10101.275807939015, 10094.492061522025, 10053.46803184541, 10025.092792908124, 10062.259069383179, 10111.543611003284, 10105.9339064972, 10150.776675957763, 10138.425571839414, 10115.377087399627, 10146.58554626222, 10210.182833734956, 10216.689887485245, 10200.366439990801, 10175.836380790368, 10186.358710225517, 10190.434734417935, 10162.074606146598, 10128.050487391645, 10138.674631971651, 10150.580772642914, 10138.752214844448, 10128.88054422192, 10116.652080375641, 10096.279326890275, 10097.284719925687, 10128.871267344259, 10109.00446134001, 10143.317295895124, 10189.360289743943, 10184.149122744035, 10166.105708333116, 10196.61022752635, 10173.131658354152, 10152.663380695732, 10208.217019773898, 10180.885714784245, 10214.696933932879, 10212.711092382635, 10172.540594918219, 10162.496687826371, 10127.606858073557, 10326.067166730301, 10270.566686104941, 10246.018331771942, 10250.206032614064, 10235.586006720521, 10220.094955266128, 10195.701951449191, 10224.645910034857, 10187.289060351843, 10390.514417179857, 10364.47019000194, 10523.658957578364, 10511.313525457857, 10483.57661372029, 10468.647478426901, 10415.178864956963, 10381.816883286961, 10370.050579302762, 10339.70826047855, 10318.351473690253, 10313.324152479625, 10297.623066860855, 10353.887803274396, 10365.786862191271, 10332.09416582636, 10296.042863889394, 10276.15994640063, 10301.850251087433, 10293.131285441612, 10474.883191283367, 10635.100563607755, 10622.469820586462, 10640.642419688307, 10660.27316915311, 10607.582102053682, 10569.397102562158, 10521.518113442733, 10502.108095987913, 10477.636338026557, 10454.810998819661, 10427.454241490286, 10419.666905106798, 10359.707155803753, 10306.8763604282, 10303.833324680381, 10284.988071979093, 10239.168646645303, 10422.372282383149, 10415.861723078984, 10520.390300712423, 10513.456606968904, 10584.171824807414, 10635.665207512893, 10732.77904065976, 10700.680048212886, 10683.666003985698, 10685.527813364992, 10666.988044674605, 10642.995225023631, 10575.786163033512, 10534.145121068312, 10569.392952220365, 10525.753071488558, 10506.647021445942, 10500.793775989223, 10556.523425971196, 10549.825445712646, 10511.683776547421, 10448.434214329178, 10431.706594368703, 10382.964619072069, 10364.05859353059, 10354.317113097117, 10330.373545930923, 10390.529745759397, 10376.62777958814, 10335.174630751217, 10287.7359132389, 10257.87406123083, 10226.359496251609, 10199.572100551895, 10136.116191369758, 10149.443446917445, 10131.61240827235, 10111.850507208033, 10109.911080094926, 10100.752181761203, 10095.159538421407, 10209.829428141908, 10190.394131800955, 10183.918797163997, 10236.015942549846, 10219.297604043753, 10203.751567226784, 10193.9026626577, 10204.29269165041, 10278.0481037239, 10258.669368886834, 10248.315954243977, 10309.444641380138, 10311.420362263121, 10438.736718725333, 10391.126196650348, 10349.543631811128, 10333.957758868612, 10306.372142262995, 10276.755515940948, 10256.443105939014, 10224.326377224015, 10212.77582919478, 10199.993834294844, 10176.00811685382, 10186.082779412092, 10383.632609902363, 10365.904750632013, 10461.818420772293, 10441.856636300243, 10611.38343219276, 10628.107600531182, 10630.823886000535, 10618.286151591932, 10674.39330001413, 10680.829492215329, 10700.283056018307, 10655.39497909523, 10646.850395924976, 10817.434443983228, 10781.585650883351, 10714.535617553354, 10684.758930267762, 10641.034975168273, 10575.30757118395, 10556.405238975016, 10525.27955297814, 10526.888659879221, 10501.367419758253, 10485.018633509975, 10477.506964278436, 10458.040356139478, 10494.260435140084, 10471.392809155419, 10464.231825267127, 10484.961607871182, 10504.106330052773, 10480.162165464775, 10462.089575155924, 10460.088757305677, 10455.076768046816, 10508.3541814158, 10490.180881162121, 10476.107734657684, 10462.551791970936, 10432.606714226426, 10416.980432433478, 10413.633661161193, 10392.497991752296, 10363.029455373278, 10397.581166379632, 10504.328257945384, 10464.371402296047, 10446.773722646762, 10561.196568497306, 10522.940278872862, 10529.83481425646, 10517.795302093848, 10491.68183214665, 10443.324060370602, 10441.574255837699, 10415.240167457052, 10414.408173000813, 10398.131857161681, 10376.085217171265, 10353.209043916133, 10332.45430267333, 10315.281403461287, 10304.041107156134, 10304.391689690745, 10266.312109076087, 10213.315048798057, 10213.082163142171, 10241.589051990963, 10220.64810470251, 10345.791322826006, 10388.54012695706, 10365.6023861848, 10344.646175349291, 10342.759636108514, 10323.89033665298, 10311.856063611142, 10291.833019810103, 10288.518762292675, 10265.1595016, 10247.314008791674, 10229.26117962717, 10209.782201867529, 10178.489603614255, 10152.260099276078, 10120.16519328167, 10112.828382801847, 10085.427413521329, 10060.017508698495, 10051.328112291189, 10048.912677469403, 10050.004557120392, 10021.067942531825, 10013.320828801468, 10008.604151491407, 9990.9786425748, 10005.160488596088, 9972.473432263687, 10038.324897226908, 10021.452680711482, 10027.076835114054, 10026.096523018927, 10002.945539431275, 9994.514836917435, 9936.184525678242, 9921.13054574705, 9873.70249562457, 9927.95968479239, 9909.159694518388, 9908.339148879875, 9902.621610967202, 9881.45720028541, 9891.85733475153, 9894.152707469373, 9879.085285973171, 9858.623924102592, 9859.255199361392, 9829.584313183372, 9782.770028143685, 9784.374108404902, 9755.90397358649, 9724.882708628296, 9711.631027662866, 9694.79429236561, 9679.274655495863, 9664.05499902929, 9634.3445231491, 9612.300256994755, 9595.271608626803, 9720.976350385044], "start": 10000.0}, "coin_M15_SEI": {"eq": [10000.0, 10046.576858868186, 10103.792188821102, 10097.256186424662, 10201.678226928405, 10180.322428653073, 10118.375016160617, 10094.187515357016, 10180.439944691187, 10245.915413919733, 10257.26393774399, 10317.10349506591, 10271.498270204213, 10210.79693391801, 10235.467632407242, 10215.624548708183, 10182.316836619595, 10249.035486540104, 10245.254051490667, 10217.170502927056, 10186.507145403753, 10200.211468670741, 10198.8013384479, 10217.955055869503, 10222.571537561646, 10213.72167794354, 10222.47465830131, 10205.424042943421, 10212.228725336583, 10198.276203789246, 10213.966258377324, 10192.487022462992, 10188.223612198306, 10168.390382201545, 10241.076742341405, 10293.979744710372, 10273.247862357432, 10253.369935154367, 10279.901843988953, 10384.440410320152, 10353.06251461463, 10311.546330367091, 10273.34571786709, 10303.881901440274, 10310.411691295347, 10296.383587338512, 10278.28140593986, 10279.735809841595, 10340.549438371647, 10312.540567976013, 10298.219209742281, 10265.854735827774, 10224.046113315539, 10202.569344686754, 10165.868196686753, 10131.947325317458, 10098.781728597243, 10054.122609607275, 10043.140573490642, 10083.28481051776, 10049.42383495057, 10012.234724120246, 9958.59639949468, 10116.821062238336, 10080.265030756045, 10049.608372252644, 9999.15431985282, 10105.522093254118, 10094.95172740046, 10072.217290293542, 10076.629664652515, 10033.043221795373, 9978.043325024335, 9997.512420213161, 10069.106282409572, 10077.750619681852, 10037.289383101335, 10053.662226269038, 10062.949920318537, 10225.485003217389, 10220.411189510223, 10179.00682342762, 10142.226329140189, 10116.550208117107, 10204.66632254194, 10172.638744006445, 10162.713941296417, 10202.49579359401, 10153.338432704613, 10156.82005822888, 10130.844321766785, 10190.028240902588, 10153.870562636008, 10136.132107224163, 10079.88238500194, 10135.886003712074, 10138.927236619662, 10102.272266559781, 10069.055423351689, 10009.321107444295, 9988.163068657272, 9973.04508017635, 9956.013273930786, 9968.290923281436, 9923.002198866232, 9957.495866808084, 10034.470220495634, 9996.951327191733, 9957.216486169731, 10000.831452196318, 9966.126500109765, 9906.991651309765, 9862.453543977943, 9809.547004847509, 9796.816259543226, 9776.323337870223, 9796.481824074548, 9743.88663561582, 9691.802092560265, 9663.992039119563, 9611.977756867247, 9712.72746460579, 9688.610451227863, 9716.159962358, 9696.069622269895, 9680.974928649051, 9661.667037595022, 9666.370133262892, 9647.513792065069, 9616.289828109431, 9594.058848737233, 9578.674168627242, 9576.154128880178, 9564.576523450314, 9579.971363199644, 9558.985811657794, 9537.553822020489, 9536.839822020489, 9517.61391461308, 9493.531287479209, 9554.252765969113, 9529.54343677143, 9528.82943677143, 9520.035008661574, 9545.753876450037, 9520.831393233799, 9494.97393363014, 9541.97047076853, 9521.559071753753, 9503.250853160787, 9532.978656452968, 9564.224943992904, 9551.139124685973, 9649.875820592406, 9616.705879033965, 9573.790816713736, 9558.362660319992, 9539.901897481523, 9511.67478738978, 9493.029860031289, 9458.037091727303, 9445.802665623656, 9438.449670367489, 9417.671203318778, 9412.277226727017, 9402.152530584026, 9377.216053417204, 9550.394101172695, 9556.614041057088, 9662.7119825037, 9636.300219007557, 9688.3755066065, 9730.821580422657, 9716.751679221054, 9725.257048127509, 9734.990640816804, 9717.132367729733, 9704.333518065303, 9682.406934510926, 9726.424345080031, 9728.546211746698, 9775.939903401577, 9757.401659716585, 9726.41967181946, 9763.87119017482, 9747.734430203107, 9713.32303418695, 9705.542940342348, 9659.754857176014, 9612.404516747294, 9585.775967477744, 9540.199611206608, 9505.864069270216, 9521.75713174291, 9530.07292931436, 9520.697194210163, 9479.404058898072, 9507.211004606292, 9505.716764987184, 9521.881152114196, 9562.785850032518, 9548.336971313984, 9576.957867476513, 9565.128789698734, 9530.158660288671, 9564.791905684688, 9540.649984995567, 9572.68766045647, 9553.248832654957, 9547.342088683088, 9534.471843638943, 9514.189308731691, 9514.136666985081, 9652.976602191693, 9662.247511142903, 9645.742405969833, 9652.140638510557, 9642.685835573207, 9625.759416848548, 9610.615388935472, 9639.438393552276, 9635.494541354967, 9642.82344051463, 9671.917878967983, 9667.914377322644, 9657.108734806137, 9695.966584088868, 9720.239667232972, 9812.469901736735, 9792.735837484972, 9782.213533962373, 9765.89942480058, 9731.12848957985, 9741.347352967829, 9732.097978281741, 9755.53984640062, 9756.728610373624, 9738.737287402984, 9732.422571104173, 9713.604107727017, 9720.601591543887, 9699.910417305246, 9684.191170772368, 9674.52913731204, 9670.204540365725, 9649.710866613872, 9848.150173933309, 9828.027469002023, 9805.248919570355, 9887.683933626307, 9855.289030766638, 9896.30098875111, 9860.651093596225, 9852.691709563303, 9832.86376431081, 9820.316151015242, 9851.864628868034, 9852.427205036482, 9827.444600021308, 9810.846719026056, 9796.602262693475, 9765.98539908681, 9819.970341989268, 9755.925470259945, 9715.909991826908, 9708.274634694566, 9668.393335864157, 9668.897055888503, 9676.25451825901, 9661.480793157, 9645.27307154746, 9621.39004021231, 9599.526617368694, 9581.121902586348, 9575.211481228855, 9687.855343725123], "start": 10000.0}, "coin_M15_XRP": {"eq": [10000.0, 10002.429042917307, 9992.430536781309, 10020.054398797756, 10066.38037417219, 10068.594800239187, 10166.901254214432, 10159.536832776754, 10138.052831057867, 10127.20340813966, 10082.847788189049, 10050.243801259277, 10058.516674903814, 10095.9975670961, 10075.999077935561, 10083.208183333685, 10045.828940949103, 10052.04629167256, 10042.613878477403, 10001.93115867614, 10005.561846410455, 9997.743038171819, 9990.17610456077, 10013.118079592146, 10016.259004901665, 10066.884259214916, 10065.353586426936, 10083.807464955198, 10102.694308092454, 10090.9213351435, 10079.944853829995, 10076.530163552563, 10116.578167768384, 10095.39937925317, 10126.196191321616, 10153.366932428848, 10154.980622203313, 10130.064436719442, 10123.779049013276, 10144.546207180698, 10134.578102818394, 10176.49830139328, 10170.765731353958, 10140.260922702182, 10119.543787118835, 10140.16532678528, 10131.808741597184, 10116.221017256903, 10121.996363443493, 10109.682692876406, 10163.823327570852, 10156.369134420936, 10147.357844994736, 10142.474036142017, 10119.760908382908, 10098.86184326804, 10077.980041617056, 10101.976619260786, 10081.125379047939, 10085.032535934884, 10055.030805712047, 10153.658827500369, 10095.386064868171, 10012.735523248084, 10015.596926419406, 10017.972771031928, 9983.54687800313, 10024.983906737816, 10021.481322771462, 9993.30012678248, 10006.236274139437, 9964.805264015471, 9933.210888633299, 9946.555251029333, 10032.994301810582, 10015.341300549211, 10003.167382676631, 9996.823997277392, 9987.681367929237, 9967.704058682335, 9937.371006830483, 9912.513916306927, 9898.139684075335, 9883.069963606651, 9859.186302320577, 9897.891631737779, 9896.215588590774, 9881.046723053325, 9864.314070881132, 9957.083108719404, 9944.973754938077, 9924.959974338652, 9923.101915970838, 9902.197386004329, 9969.277749287266, 9966.823646091474, 9906.445132341121, 9928.844384048229, 9880.756437857523, 9859.914344636793, 9826.41404402607, 9834.122132894172, 9772.675105347002, 9793.513593946842, 9766.683580653202, 9714.248793418037, 9805.959816469904, 9789.506254497426, 9774.12016963991, 9745.437622110347, 9715.484911213254, 9698.046221336348, 9687.713321851346, 9756.357650547237, 9809.39105882053, 9851.017750448438, 9820.591195033188, 9790.183947410804, 9797.97403204451, 9795.379480468304, 9786.248952924401, 9742.724915369816, 9701.126577150944, 9714.146678494757, 9693.12512517454, 9672.672193558332, 9663.049509018696, 9705.72125401348, 9693.742062332965, 9652.044898301241, 9602.960262194474, 9590.311992576235, 9550.418900933584, 9526.19211983526, 9548.274752614458, 9544.225534444005, 9529.70545770465, 9544.317554735291, 9536.548383051604, 9527.431190331772, 9512.998588793886, 9494.248915756527, 9466.368103386161, 9454.224264494842, 9455.563474267286, 9433.589392385848, 9418.14447826764, 9413.03306891844, 9405.703156663956, 9409.718976994925, 9600.849657679442, 9629.767139087115, 9605.444300907418, 9619.745937314512, 9658.76538147855, 9695.686171527093, 9690.463160032283, 9716.019192821565, 9694.798156396067, 9702.209246455324, 9670.65700383288, 9640.226797913016, 9630.278339689348, 9609.867759524748, 9589.238517902353, 9592.017894270539, 9577.971138111743, 9556.62848708333, 9540.286141215152, 9526.798481759686, 9502.12721490546, 9627.37895436313, 9605.359585996717, 9743.344778184412, 9750.669054988237, 9705.958038531176, 9670.424780735348, 9687.262155245011, 9674.283932595283, 9668.202737166795, 9735.598048958593, 9717.630612232839, 9706.222725601607, 9699.725921942738, 9685.425591359197, 9711.181141811623, 9712.789928672628, 9716.362670997882, 9684.334892812472, 9676.33497147234, 9711.183108565616, 9747.13908657148, 9727.8769523394, 9683.649897690557, 9642.044627060692, 9632.251235753136, 9674.081457032844, 9716.23889751822, 9723.509734613339, 9705.050397790366, 9684.699150486987, 9675.602677811383, 9680.233976026571, 9662.623268271234, 9727.054224872874, 9705.629449557679, 9666.637610069965, 9712.313449994253, 9716.70147707301, 9714.929196869893, 9709.355723359959, 9753.046950899781, 9739.668930081882, 9728.896564508233, 9709.542761150386, 9695.65221928816, 9686.797074114818, 9692.413016713688, 9686.318480514765, 9675.00618607879, 9666.677438133998, 9649.313629424469, 9655.175736473882, 9646.215199006374, 9635.19256465163, 9621.523658578393, 9607.148115742244, 9584.748784469895, 9555.973351367453, 9552.407620984857, 9568.668408612026, 9551.251132481095, 9591.544047616386, 9595.696611658363, 9588.071189282498, 9576.945597440023, 9573.031181376547, 9570.151906484773, 9567.348497302024, 9570.685373934015, 9563.804631277162, 9580.44887505229, 9559.140693658277, 9551.901351163408, 9545.946377159184, 9542.669424593485, 9553.41453316533, 9547.79009672557, 9545.28088984388, 9532.688730301565, 9534.676275995327, 9545.456554596647, 9560.593964727952, 9555.923191737416, 9555.209191737416, 9550.061359529735, 9564.19111634139, 9555.05392951, 9526.699400319665, 9511.198677577355, 9507.98851693367, 9520.630232391566, 9499.907872958202, 9511.136286622352, 9503.291853985333, 9493.851039015755, 9489.068724480872, 9492.807568686943, 9481.54247347328, 9475.3446288922, 9460.269000291302, 9468.827258326883, 9450.766201589295, 9429.160224930818, 9437.693824885691, 9542.390421651471], "start": 10000.0}, "coin_M15_NEAR": {"eq": [10000.0, 10032.431561277444, 10045.750534853001, 10014.895485178735, 9997.98173695739, 9995.660092120106, 10108.022436283765, 10090.365452860342, 10036.51663712682, 10020.078462725623, 10045.515771863427, 10067.790227159658, 10054.217901176564, 10117.562502814688, 10098.95513169297, 10065.422615289568, 10101.950217250353, 10058.12064144695, 10008.131016945319, 10049.750080994118, 10047.842239831698, 10070.253272115477, 10057.711590760928, 10085.083584154818, 10084.794241334088, 10068.788159805426, 10078.526303260049, 10074.08580781303, 10059.768418534679, 10058.217999638358, 10055.83375235348, 10041.307291684023, 10136.720744841266, 10112.278397326207, 10137.299965549819, 10188.235807070077, 10201.127534102214, 10166.831986172338, 10299.956872134084, 10270.270088238476, 10232.452110508813, 10287.331352076433, 10274.716840171672, 10220.627509706956, 10171.564763301727, 10218.944849840189, 10199.478528050868, 10173.387824742043, 10161.204274365564, 10189.154838384426, 10282.134039654029, 10248.291112033681, 10225.773926970893, 10203.092627984406, 10205.352772447217, 10225.081136982484, 10212.931113429322, 10196.554614450424, 9956.984897627368, 9880.065806918428, 9870.353383841506, 9836.184009357608, 9784.349632210186, 9869.982236420712, 9849.920307388455, 9807.368068196725, 9818.8283401859, 9776.209902574492, 9708.368464165595, 9696.646409144962, 9708.172935675573, 9695.357842933638, 9732.257678701677, 9740.505921449118, 9692.456264970426, 9729.26130292795, 9712.121244242504, 9690.39735975563, 9677.99982773132, 9787.069566614953, 10212.876995414103, 10117.529595786542, 10076.340088130877, 10214.32806933655, 10191.802180081713, 10231.085619054777, 10197.064793978056, 10160.056662458781, 10145.780766178694, 10110.89307984329, 10030.842333811544, 10150.39492561024, 10114.206306436512, 10067.896682603454, 10039.356485649672, 9983.51746457998, 9958.746515783258, 9986.899060903928, 9973.223725409602, 10052.998219662475, 10118.332060733903, 10153.92359116383, 10131.780395914699, 10099.083401243295, 10082.884397800954, 10013.964238710045, 9963.077213069018, 9985.346716802505, 9928.21547517993, 9892.598053373076, 9873.829092506128, 9931.995700721947, 9935.189100070482, 9903.31537521649, 9844.094893781627, 9830.675824931359, 9772.556583347201, 9737.516607857006, 9730.034544214486, 9713.636692135413, 9726.34071898105, 9712.376957391645, 9694.022198568116, 9695.304919126998, 9651.939484460332, 9584.349250477046, 9573.84762319245, 9559.945000911634, 9570.937945609096, 9574.727160400093, 9549.474120348414, 9542.135239553712, 9692.683009290555, 9654.241259576269, 9619.948942946314, 9651.155166308137, 9643.969080963818, 9623.105710110738, 9602.073762956266, 9592.465065268063, 9580.591713329168, 9568.584318795596, 9559.647638419568, 9548.266324438526, 9530.559565352945, 9503.002354261711, 9552.792965759969, 9591.3411807959, 9584.8754949501, 9666.945667982507, 9635.95856766705, 9625.481812299451, 9587.410019773677, 9536.47729487408, 9512.189814313213, 9509.51689068397, 9487.963427491788, 9506.551059560983, 9488.882463224483, 9451.57845563304, 9430.232676005877, 9415.91762909901, 9385.7037686027, 9559.89669396552, 9556.671028136374, 9651.70908355199, 9638.000652725621, 9626.93488696833, 9609.467093672241, 9689.27425371012, 9659.734296964498, 9615.526514355803, 9682.877637323283, 9679.308193936033, 9668.161487104913, 9656.897221524856, 9638.16309154383, 9611.352821978613, 9588.048019718726, 9610.463661337224, 9636.367374354975, 9695.232753797818, 9683.286809977593, 9651.570010390817, 9774.058504378792, 9762.635954869425, 9749.569790703494, 9660.35235638714, 9767.974050968422, 9734.655822820274, 9689.481373752842, 9725.567293422511, 9712.386973858987, 9740.886240630889, 9779.182699167475, 9766.727419824752, 9803.89625586497, 9802.436833361244, 9800.234161730566, 9787.584507741007, 9856.852884306962, 9852.69412879732, 9839.630386861836, 9925.813277063366, 9912.16630065545, 9907.595874286908, 9888.455275208567, 9921.399609324373, 9901.259348595628, 9920.370755697197, 9895.23413817403, 9874.651216757795, 9851.929834878032, 9821.768096349893, 9805.079986173274, 9811.206034036522, 9874.152603743923, 9848.348743711562, 9827.121154129873, 9804.64273914196, 9861.479164220824, 9828.688094123881, 9803.416390366656, 9754.537053329619, 9692.360904213012, 9663.02223102024, 9675.480686364312, 9669.707077260266, 9656.776016872056, 9614.562490671182, 9594.987301991936, 9579.310697291081, 9570.88015483494, 9569.458688781191, 9550.376690194618, 9567.66767579577, 9538.371507907206, 9516.517888284565, 9512.109716074661, 9499.522042484157, 9491.47928148709, 9474.511327277341, 9481.788659399435, 9468.092376775066, 9472.358804533074, 9475.895613314944, 9458.118005918073, 9468.985563081604, 9436.80403087077, 9454.993224370392, 9442.727109578404, 9431.097288845745, 9398.012428398559, 9377.370998119673, 9362.599518432173, 9349.202703852141, 9339.102384603315, 9320.214442265242, 9466.848906190766, 9434.345332830388, 9453.938628374293, 9436.519887205379, 9401.70562062294, 9368.933090210907, 9352.381907067687, 9311.730924453392, 9284.401042719646, 9279.868886231097, 9256.349342504862, 9265.366441726652, 9247.63167027937, 9214.261112651122, 9237.409558457573, 9193.201775848878, 9450.24596485854, 9357.324310513846, 9532.811120623737, 9534.340073538535, 9451.258485523555, 9425.637637768452, 9375.160445813055, 9402.536939945494, 9482.432358229236, 9395.49445080705, 9429.301553672589], "start": 10000.0}, "coin_M15_INJ": {"eq": [10000.0, 10032.011888251931, 10082.642649215977, 10106.589836438825, 10095.399497685647, 10079.494343180546, 10193.34513621522, 10168.672138555205, 10100.096905190505, 10067.499591518743, 10144.186321358016, 10199.271194104158, 10198.419861640907, 10257.771265460637, 10243.979053430232, 10201.037141855026, 10221.632947866538, 10196.976638814844, 10176.292873101724, 10132.64598930501, 10076.905769121524, 10141.010173300503, 10147.891444721552, 10129.551324667797, 10101.260966047106, 10117.604509581133, 10106.608642679075, 10098.756993850162, 10084.26383960713, 10089.486212840518, 10099.765066504802, 10101.693606944551, 10110.635736258253, 10105.985449937752, 10096.974382307872, 10084.166791793303, 10076.334353891312, 10061.425421524535, 10118.481072501647, 10100.148823274416, 10080.297831680746, 10066.687619725399, 10084.951483846558, 10134.845175214921, 10134.645470452317, 10094.91071330841, 10106.353005446419, 10132.331962557344, 10118.417566978185, 10211.700748360003, 10188.92045962987, 10156.265322553616, 10124.700106836148, 10170.703369886049, 10168.526267776708, 10142.79903014953, 10135.357957471198, 10116.768336959682, 10197.146934097547, 10190.966923092468, 10192.548314596486, 10230.259635024131, 10207.555394315745, 10210.740471538644, 10158.606015599946, 10333.444524537725, 10283.34228376224, 10363.687913477152, 10356.53306847059, 10326.506337835306, 10327.891693103069, 10273.252289563658, 10200.314855847351, 10201.506751536801, 10199.003841372163, 10188.246816632112, 10184.693929873149, 10184.573472652311, 10216.02561525502, 10217.843290626008, 10165.942404223055, 10222.742548017877, 10202.432760553344, 10172.373902489677, 10145.215672329932, 10280.281291390053, 10267.876448285557, 10247.023095742143, 10214.684354856334, 10196.85161341265, 10323.806916716412, 10300.02758510106, 10328.071709322192, 10305.958319889201, 10236.507827963893, 10206.65458463643, 10128.5590569903, 10112.428596373862, 10042.880269504834, 10009.102855227744, 9985.022473927525, 9969.942838624609, 9890.802341647763, 9831.978309482616, 9812.5172235782, 9801.010222653415, 9740.695671723253, 9854.827262123772, 9958.490714038042, 10089.85237700039, 10196.304385599664, 10238.063257881335, 10214.466298076, 10174.815694681793, 10145.702745818156, 10116.652610035993, 10099.239402287638, 10037.415576515, 9986.642805947806, 9902.341507758816, 9842.406558892359, 9866.151595479869, 9810.642883615463, 9786.647015244613, 9773.260434334845, 9774.435325951159, 9720.202792277303, 9734.28519803385, 9720.185838325997, 9748.888052802658, 9714.7114269552, 9692.288671365546, 9719.241255145851, 9745.885661617667, 9726.719354684848, 9718.567756171837, 9683.570362640254, 9636.087593029106, 9615.840092277549, 9597.379943131687, 9592.578743432958, 9583.434768713856, 9592.573688790993, 9557.686661632071, 9537.078248213935, 9627.458092676987, 9749.22453394829, 9722.03411765777, 9740.701562990569, 9721.745758872921, 9768.001312502807, 9801.141586550995, 9783.681235132759, 9752.946841134695, 9723.295806924169, 9699.151068054638, 9674.613535238295, 9650.639926635311, 9621.910936292574, 9607.359931227309, 9675.606699290338, 9725.243222389385, 9721.123283718174, 9815.789951144576, 9783.59443739274, 9769.21850567802, 9754.82248001506, 9743.480229147757, 9719.389038201609, 9746.804584774543, 9735.470507694978, 9708.244875983759, 9695.73895989206, 9674.071536243411, 9632.780807366287, 9800.901490741775, 9800.464017159478, 9773.468514117443, 9744.739727806476, 9846.085992846676, 9842.902976483601, 9830.114100903285, 9813.197936071481, 9863.481308778973, 9853.599276024306, 9835.689056520174, 9847.320338938114, 9833.760663175675, 9826.70978203463, 9829.186713454088, 9821.115340974087, 9774.608080496975, 9762.184328955667, 9738.692393522106, 9853.826011698378, 9967.118261766704, 9953.145579163373, 9929.603801420328, 9882.451618046245, 9874.363191443681, 9841.207706874799, 9813.190309637048, 9780.15750585984, 9769.5160463825, 9782.5540955145, 9780.22400989253, 9773.060700215112, 9832.108287228099, 9819.312966440806, 9813.703825580968, 9823.420882972272, 9794.469611371584, 9826.21807236924, 9833.613321720732, 9883.224598608604, 9871.302116815887, 9841.358789330507, 9853.014454200513, 9842.031248422021, 9829.636141707782, 9802.64104969111, 9798.962540965395, 9791.02853242961, 9772.451014572467, 9754.524188386633, 9766.707353014732, 9745.571978935695, 9747.936000474157, 9716.368821461812, 9701.84947008177, 9707.415949662922, 9698.721300686162, 9683.903596969714, 9662.588876899907, 9627.003609458046, 9626.998579691923, 9612.459729691924, 9603.83208208315, 9593.132351080652, 9566.823631441013, 9566.109631441013, 9546.06336334544, 9550.518148247198, 9535.052656134716, 9548.527573336472, 9525.146370404116, 9480.785527132692, 9481.43487568465, 9491.293694858994, 9455.45574887655, 9552.554175491032, 9564.322348396558, 9545.263515965751, 9527.994420041754, 9517.937962097829, 9499.871451750903, 9569.428497219045, 9557.531076313511, 9540.515545909973, 9524.904405983027, 9479.632675362871, 9470.222439489211, 9455.724221161145, 9442.771656057737, 9512.536083395868, 9498.64533796576, 9477.508809178284, 9453.221932959432, 9460.179181173246, 9432.144506803497, 9415.843026486524, 9401.621219683097, 9484.659015993628, 9465.735207719395, 9615.652344705697, 9568.10968772426, 9545.815114092802, 9575.253718702732, 9504.282461339335, 9448.709469204749, 9473.25571071262, 9462.639186874236, 9422.731342505362, 9331.208337300282, 9274.778407542695, 9165.677233093535, 9096.959067673144, 9064.1396766751, 9136.209694877603, 9118.345707426208, 9087.581622456617, 9103.355054201511, 9288.913329064899, 9255.023049009626, 9270.9474820606, 9318.635494485683], "start": 10000.0}, "coin_M15_LINK": {"eq": [10000.0, 10035.913573826305, 10067.056260663678, 10065.500765861058, 10348.350023050227, 10306.137722657373, 10354.802109652748, 10412.733712374302, 10537.344290491488, 10484.707248725523, 10411.636015986101, 10368.558924087272, 10363.557336954627, 10318.714633939311, 10298.983817757784, 10280.272740888626, 10235.775126972323, 10269.277442330165, 10265.623559428997, 10199.454768394142, 10109.168140537946, 10103.184142636626, 10092.58913305033, 10096.567198672774, 10102.076657038533, 10106.1336300986, 10069.815197382632, 10066.279884328644, 10086.182600814514, 10051.908970888433, 10098.19469043985, 10143.978833198833, 10139.535928786134, 10132.394923425116, 10115.790766665159, 10087.100462558277, 10083.211533894313, 10104.431324654386, 10096.647410595235, 10167.662008782154, 10156.395601741604, 10125.826514323266, 10091.398742098001, 10122.954322743162, 10140.974481454728, 10126.889800080771, 10132.886399333833, 10097.034243146934, 10098.27027939427, 10065.035391682597, 10042.885440665232, 10035.80573625116, 10013.50261682292, 9986.473017605735, 9975.252791840769, 9985.029695708468, 9963.851062527618, 9926.78062834812, 9882.536018077295, 9995.63788424327, 9973.297751334543, 10079.0940274953, 10161.322468126322, 10179.463189743135, 10186.849657188028, 10156.951549093592, 10157.165722724047, 10153.28569052935, 10146.59036274432, 10129.563219152333, 10097.361433507276, 10076.014062350328, 10038.054403128192, 10009.54956421227, 9987.208275525234, 10016.327114260323, 9992.538185945741, 10108.643363041443, 10094.692173352661, 10077.350986159201, 10057.681011286513, 10020.481071938108, 9979.122608610265, 9951.747081202655, 9984.74243969322, 9978.071621311343, 10018.585980788888, 10025.228001489624, 9968.32142000307, 9933.62655759294, 9875.137834576864, 9904.427771679098, 9883.130629011408, 9869.370353997156, 9855.857548087904, 9856.78312700902, 9808.905385181753, 9782.56234225719, 9750.817133799079, 9722.353143146282, 9666.795886288426, 9709.865942473432, 9717.345737555399, 9659.942425150988, 9626.559357808868, 9593.781623441251, 9613.129135001724, 9604.93191387665, 9592.267919593905, 9591.253218609461, 9539.471887830407, 9572.338076889071, 9726.152326336109, 9743.466613408622, 9708.588513769893, 9657.88285700323, 9635.516454295712, 9601.726780419081, 9595.656920849113, 9553.536124619755, 9513.565743281702, 9516.324220824916, 9462.73936051355, 9432.667138866773, 9428.527207628622, 9430.594620228314, 9374.503815987357, 9374.256037985182, 9365.695912480052, 9378.145535570833, 9346.091033546863, 9338.49158713585, 9355.75619252322, 9351.20358544032, 9339.503622710368, 9344.347609102188, 9326.716573717573, 9313.313752533157, 9301.054465343243, 9280.749832083966, 9261.15789955229, 9252.708968401514, 9259.093894285115, 9239.812723511894, 9223.189707835916, 9209.452543204236, 9196.370674031183, 9196.788573974607, 9259.325712901706, 9246.051108305404, 9260.813318887096, 9226.783699437718, 9210.676256879346, 9242.70835784683, 9233.048165698225, 9221.478872709911, 9203.354980359487, 9194.386831379428, 9189.430957620241, 9183.69271578172, 9178.285911511259, 9169.885638631837, 9209.018498363077, 9212.589460102587, 9210.927931192635, 9200.357837556669, 9125.087822813588, 9156.950852801874, 9121.134761665291, 9066.272767103257, 9036.204171071511, 9023.302665511414, 9008.941386490491, 9029.610939070344, 9022.538844836517, 8997.306703928574, 8977.855561212362, 9165.881839697617, 9158.767812229627, 9264.72251748841, 9288.662346711304, 9330.197756793048, 9302.46637841467, 9268.845898151512, 9318.47956989013, 9332.706331372445, 9329.713163565788, 9316.311820444216, 9300.596972085872, 9285.44482981783, 9266.896187315571, 9270.437557400648, 9296.616158601433, 9360.125662873976, 9345.23914407066, 9305.876372711733, 9388.915611622786, 9431.200932649204, 9405.606124865519, 9341.869285673038, 9293.475304118792, 9282.786397643147, 9342.99026997633, 9413.967273292192, 9447.807127422851, 9438.625911474528, 9420.579614290651, 9401.540351197822, 9403.584443571732, 9392.961558473778, 9459.355240252331, 9451.18351343452, 9421.995141108113, 9470.756226458698, 9458.630275635427, 9446.364296066251, 9413.718779820367, 9388.390031096022, 9389.224836098236, 9374.80428714796, 9382.044716949573, 9446.67251731726, 9421.091776023728, 9399.131465748455, 9412.935343638545, 9406.493234385223, 9393.144256817472, 9394.622251166451, 9392.868400611665, 9385.441372033625, 9367.264352150853, 9337.530755004987, 9330.453221072965, 9306.04926580469, 9309.021924164099, 9303.741101204518, 9301.586693423538, 9274.66731524616, 9228.431443639887, 9225.56345644587, 9239.205971316389, 9217.525737648608, 9245.628701177762, 9257.973914826669, 9260.484916439746, 9259.341992868087, 9257.128474813871, 9243.640305589706, 9232.228706204243, 9235.800266876837, 9220.46311446208, 9223.243429929824, 9219.02536858685, 9214.792469609165, 9206.741841172316, 9196.75505503239, 9284.791341059068, 9274.132036479836, 9259.60175160363, 9255.15582893777, 9297.419950886539, 9287.2640760912, 9290.174389992546, 9278.904288937312, 9271.70154321765, 9274.018641030358, 9229.061727363343, 9206.775883082313, 9206.256366156244, 9254.577566311855, 9243.435709285877, 9251.923008686455, 9239.217880596334, 9226.780947002584, 9228.57048785618, 9220.567532927482, 9195.474515876744, 9182.681213048654, 9162.612534346405, 9200.546264762626, 9181.521752440247, 9150.151103452346, 9147.024096430183, 9230.2599854535], "start": 10000.0}, "coin_M15_TIA": {"eq": [10000.0, 10022.650947989405, 10035.61549495686, 10027.419802691264, 10104.654909819032, 10043.620407663497, 9980.461710810609, 9967.239726918748, 10037.591185782852, 10113.508012840759, 10120.046765765394, 10159.71794143126, 10135.504827501316, 10105.70167150084, 10177.110148512998, 10169.96698006409, 10150.960612851855, 10241.51128066644, 10242.480889929599, 10235.759822134007, 10211.655381257746, 10233.869923217284, 10221.14970177352, 10202.827797126185, 10191.664567161028, 10176.546533395936, 10278.380674783155, 10259.33317006087, 10236.544686236204, 10237.129557806713, 10273.59633300314, 10346.318535466491, 10335.726872603298, 10292.46471934204, 10303.142662361983, 10327.451676897193, 10315.993796277755, 10305.81380130112, 10295.960604796086, 10483.412331086673, 10483.201639797022, 10455.878575095368, 10423.17319897492, 10390.689198034459, 10372.872905789332, 10358.742789652937, 10398.419827383474, 10357.908133472783, 10301.96919158054, 10239.796520597689, 10191.471206471415, 10149.112583796481, 10134.667223906372, 10155.71453813903, 10124.164093054284, 10103.156037090659, 10050.215231057064, 10281.154472538652, 10313.47329997228, 10395.53740586857, 10389.360875813925, 10358.266403486252, 10352.60943344553, 10311.736894616728, 10235.733623234995, 10220.426227631713, 10235.682560132962, 10226.906715022396, 10250.655071754385, 10231.567556242395, 10209.648158522556, 10238.446313668632, 10202.230973481715, 10251.616451959888, 10216.339470536072, 10176.34997048046, 10182.054910977035, 10314.204149279883, 10287.748269451557, 10245.60979456169, 10454.272313657653, 10420.06979611993, 10383.10882986582, 10466.30156729935, 10417.855188808495, 10477.772372132244, 10434.713063856045, 10427.732444960622, 10334.814046790123, 10449.746636293272, 10423.40482081614, 10400.756730350004, 10391.78121795331, 10381.288087023822, 10347.733886896858, 10276.43348880037, 10177.961635642798, 10207.669637511639, 10294.18574334658, 10264.452523362696, 10244.32493965087, 10305.44421852006, 10262.184976776785, 10213.978921478065, 10205.459187646797, 10155.283566945343, 10149.68054020912, 10182.563064619342, 10135.925475366927, 10105.88331172087, 10102.926025168133, 10216.09349679443, 10205.230836895953, 10197.216401195756, 10156.375748562115, 10182.599146358933, 10168.053607994152, 10181.587890094492, 10144.44092330562, 10135.442856832924, 10125.631106999406, 10121.55569234887, 10100.308726061752, 10043.043885852041, 10011.920034072105, 9989.168797089462, 9977.79019726364, 9955.061298496033, 9963.603252199737, 9972.707136134022, 9964.454350312, 9953.315440194761, 9921.456568041775, 9852.632211199903, 9940.96448341751, 9911.641608298349, 9958.917883923928, 9945.464990397222, 9946.14762749118, 9901.469559824629, 9864.517248598435, 9829.122818714573, 9800.608393517723, 9835.233560327993, 9811.483842750287, 9762.663444688484, 9711.0255514575, 9687.32540715603, 9659.846482268338, 9621.63756517085, 9589.612447890195, 9579.34148224625, 9665.584598533784, 9706.405595352802, 9711.977560068959, 9877.43985741317, 9830.322778936901, 9775.671171645916, 9743.899497660828, 9740.833225963523, 9706.64856036318, 9679.446731590013, 9657.674044143754, 9679.585597723026, 9667.866765775148, 9628.747419796047, 9598.072559809174, 9663.23682864093, 9632.113601697423, 9709.116579785074, 9696.527770929782, 9789.289752896995, 9799.42178906336, 9773.355867477196, 9746.771490332678, 9803.391384064022, 9811.224046825262, 9797.946693607051, 9860.775892056663, 9859.478593514388, 9848.278827780123, 9824.882999452679, 9807.762535012713, 9799.727421136835, 9777.225212767175, 9809.202617995932, 9816.77804090748, 9901.38233515055, 9881.028329489545, 9851.431739475958, 9976.786945814683, 9983.698065134531, 9907.383294676629, 9817.471594772505, 9747.826812788937, 9716.53146107132, 9750.361699297619, 9741.663768171398, 9713.393626822424, 9676.780204928576, 9630.085537097426, 9649.824365599105, 9664.369713574182, 9639.713447234815, 9635.404686671434, 9607.011635844367, 9617.999631747205, 9595.293403803902, 9566.28495149708, 9527.106889743513, 9513.21386562009, 9496.860401435893, 9530.838741766149, 9625.912239196497, 9583.633663366405, 9569.806369358914, 9565.088869975056, 9541.477740992686, 9539.252336396376, 9622.759791877901, 9596.591919192715, 9586.033890349825, 9572.219730067567, 9558.2221335405, 9546.423382532435, 9522.255548689418, 9480.055700415845, 9473.797636681866, 9467.918412775562, 9458.54481270631, 9441.358837423097, 9423.186600075802, 9457.79446251148, 9453.765826991268, 9462.625686634598, 9486.127067072935, 9508.870998685406, 9482.599237139386, 9768.272899547563, 9814.74555049096, 9801.008582799454, 9786.298035544965, 9737.436689801669, 9743.563205392478, 9731.561581321974, 9720.53749524955, 9706.5941420651, 9703.364575426374, 9678.96895474633, 9660.549521118011, 9674.136164315767, 9688.361123939661, 9680.911741570206, 9660.405488885073, 9626.998064827423, 9601.060163394759, 9575.760198050992, 9551.828743323198, 9518.922375639077, 9490.710136345095, 9508.575814745545, 9481.034435978612, 9642.621116915607, 9562.193702970737, 9511.079337169407, 9487.537488773565, 9476.224225685428, 9461.886252253858, 9429.465513927868, 9384.604730943336, 9380.188349461854, 9347.317673537953, 9304.457708071852, 9440.045391770149, 9440.099363345053, 9419.16320290493, 9417.69702608025, 9390.618195507961, 9406.77271274934, 9342.784568689696, 9274.010730870199, 9210.895820918742, 9279.839375179652, 9373.135857879353, 9322.93458065163, 9269.870549153615, 9243.00515320735, 9274.974646672985, 9225.241375219395, 9218.47417579819, 9179.855302628734], "start": 10000.0}, "coin_M15_ARB": {"eq": [10000.0, 10034.274233086546, 10071.112959541571, 10087.23311609435, 10260.730759247877, 10213.622110396287, 10155.098447669398, 10132.19911097585, 10268.188427215166, 10333.239173118385, 10394.203517526144, 10412.349503726338, 10387.674171911758, 10362.392849606096, 10326.033893187712, 10241.477318002831, 10335.119310042255, 10415.313990160024, 10395.763679626767, 10396.394503709733, 10384.14616140204, 10410.289995254181, 10402.181594814358, 10399.654258862696, 10394.317864612596, 10382.895134861032, 10362.404025148802, 10350.472974180402, 10341.898878011047, 10324.92221595049, 10335.801756042472, 10313.732042265046, 10291.736693319817, 10267.482554304592, 10293.613681236586, 10361.597763080425, 10348.76687823194, 10301.819609929282, 10303.645750468766, 10333.747973124255, 10316.946377067123, 10420.33822720002, 10398.40861811741, 10430.347912591646, 10437.584796901117, 10410.31899704459, 10366.992681880369, 10339.505136868203, 10379.534879996165, 10347.616665742977, 10322.181973316392, 10307.879243409216, 10268.760374970529, 10217.621875783536, 10212.04450868933, 10246.454154467108, 10201.306460547255, 10170.212855341182, 10115.015388908434, 10274.18031567736, 10246.385292120234, 10193.594595994326, 10128.749298813658, 10188.616402102929, 10189.53794366052, 10158.430869175058, 10165.006593017797, 10118.63575795327, 10065.261455424674, 10083.620038837447, 10102.335446028896, 10097.806929346341, 10095.510715038015, 10069.423043509798, 10096.528421988462, 10114.172357307354, 10064.134874929174, 10106.311745657737, 10123.779194630455, 10254.43857504726, 10229.361607796687, 10210.296015681151, 10206.133649640522, 10157.32556310206, 10225.577759065363, 10214.561421269276, 10210.450741011036, 10175.629785675203, 10145.58237749848, 10246.12734013435, 10191.010999998296, 10211.48761590557, 10180.159804145667, 10159.219546352913, 10148.187183429709, 10157.48927354235, 10135.291163554992, 10124.23755631985, 10059.181658195383, 10131.842362978981, 10170.937155014379, 10124.343897803978, 10112.331943464014, 10123.968029883767, 10107.51890858747, 10192.442243488693, 10295.08639318005, 10333.54721276047, 10303.731524259741, 10243.026099971885, 10202.250970787538, 10166.160888272803, 10169.714813794624, 10156.242363629295, 10171.380911203922, 10130.248446557456, 10086.301871976697, 10105.89032031618, 10051.052523235201, 10006.519998596077, 9999.132177899844, 9982.56998730935, 9921.386089388747, 9926.710461622148, 9917.902186318504, 9948.832132236872, 9893.869855629917, 9832.967245044958, 9833.82914047323, 9833.11514047323, 9807.226500389284, 9779.053831390362, 9739.06627193515, 9702.352510757395, 9686.380801810026, 9671.230864343432, 9642.076020297067, 9597.420091338281, 9580.088649260359, 9565.634933465324, 9572.213795372567, 9543.553971264962, 9527.747223403865, 9539.812439040043, 9528.75016781851, 9530.652164157424, 9645.261425824965, 9625.264568749271, 9621.784029081375, 9597.472338517082, 9580.044921888071, 9605.075403505718, 9576.06962048685, 9557.388043302384, 9541.41959599671, 9520.359351928913, 9496.397840301006, 9502.97507207943, 9579.081410307526, 9619.291105762071, 9627.57863040662, 9602.901170096617, 9493.05183339937, 9523.759963677434, 9483.71923215165, 9430.96673851579, 9383.451987858241, 9389.914942052503, 9372.530964287078, 9411.401469657343, 9410.099098262404, 9399.369745494441, 9377.089103511935, 9351.932530806333, 9318.071555239143, 9486.491319980418, 9473.471794274408, 9486.692385916636, 9456.992455061618, 9548.960841738493, 9541.498197012756, 9609.627796842831, 9610.737962901225, 9600.913243411243, 9661.549174819185, 9681.250623798776, 9662.31396494461, 9653.639564414105, 9638.895487221122, 9759.221124231797, 9734.224298320865, 9742.84973089348, 9709.686586390862, 9693.815662148438, 9664.327290080208, 9622.984081518189, 9668.66701400764, 9623.582340620544, 9583.307179423633, 9531.318599524135, 9447.460296464862, 9345.563158821484, 9288.997892722999, 9248.149208670842, 9245.507256886849, 9240.927142877186, 9225.78133825736, 9290.520384155798, 9312.786683006372, 9272.221893425167, 9246.958703837741, 9234.155797493331, 9254.329860179898, 9260.440907938182, 9316.625135612372, 9304.765096615158, 9293.953692574754, 9288.599817806666, 9280.501566652465, 9347.718786187348, 9344.011843073577, 9341.29512635686, 9302.632640842374, 9308.151394736455, 9323.105780316391, 9380.025516941905, 9357.485250566358, 9342.25714230743, 9347.041728666065, 9327.721526259063, 9314.122761489998, 9311.231705994895, 9305.090762455264, 9284.719092149588, 9254.037207781279, 9216.886363410418, 9209.78486820275, 9166.183108288495, 9200.400107260746, 9189.75207548319, 9317.802316387812, 9332.773356457497, 9312.597280351303, 9291.117746957802, 9264.771875162929, 9242.271515816286, 9398.695003382894, 9430.225818425104, 9421.584435395762, 9383.287078880974, 9358.698708310867, 9346.141492051987, 9346.207244782096, 9324.441304797683, 9315.333355942721, 9299.217400592452, 9265.156704610647, 9269.150266963588, 9229.049229926552, 9179.917622871588, 9166.68853053982, 9150.12101231478, 9118.99665584052, 9109.42993902636, 9091.178342535133, 9118.883575489679, 9101.46710264089, 9095.65357672755, 9163.385124487484, 9157.922594424193, 9255.598653479312, 9231.220294339528, 9222.10593299499, 9222.804866610808, 9161.999172834287, 9150.747175844068, 9095.696661324337, 9137.517525891266, 9114.607505332055, 9125.67230936906, 9103.68930936906, 9107.324687629929, 9083.038319944339, 9087.692962162586, 9044.727864141003, 9036.49944536166, 9041.375247784772, 9026.754523966421, 9004.1105129975, 8976.284033558248, 8947.372642293461, 8969.138574877732, 8932.996614149763, 8880.625648906465, 8855.368950134038, 8857.560149553205, 8841.317714601748, 8893.87716430589, 8859.841730972557], "start": 10000.0}, "coin_M15_DOT": {"eq": [10000.0, 10018.23839785832, 10041.58521453898, 10043.331781087218, 10141.486581909136, 10112.091191981437, 10063.64823633432, 10040.528683776418, 10088.092189875497, 10150.568634425485, 10146.560500331694, 10168.998200992935, 10154.490637077288, 10118.125054447932, 10162.003846953667, 10122.476581214281, 10077.38096810646, 10138.635985805575, 10149.710228730104, 10132.673387238263, 10123.807354618488, 10145.19785153524, 10143.43325458306, 10127.458679622514, 10101.365142316814, 10109.426203720323, 10119.703183339523, 10108.906009334218, 10106.091918998083, 10090.635815840189, 10149.807068174214, 10128.287992323956, 10180.527276839775, 10214.198413875969, 10196.281693696808, 10148.777188779562, 10177.841738275438, 10280.858570941215, 10267.4877206433, 10244.387054060448, 10210.482742943872, 10218.421029384981, 10213.346256739356, 10198.709762409459, 10197.995762409459, 10198.298902216271, 10264.48213096945, 10229.651495863322, 10196.200109793212, 10168.533238787013, 10118.846711970204, 10068.066016413562, 10070.605911321723, 10097.479972271898, 10076.51581617085, 10076.288489486344, 10045.650885446432, 10231.405839535744, 10196.78473808647, 10147.537618392886, 10104.829483233068, 10180.087940493951, 10171.467548128065, 10134.69215194089, 10148.359098411282, 10104.093936142152, 10038.295720592214, 10028.788859875514, 10046.499915170421, 10038.544107338897, 10066.895192931841, 10047.76192118581, 10032.090669315485, 10037.074905391435, 9994.36444581155, 10031.870065412879, 10025.631268176265, 10003.721791621905, 9998.927616111701, 10111.642073761974, 10102.456522914516, 10027.512458034951, 10156.950892031335, 10123.265125311334, 10102.112327913565, 10052.993956945822, 10001.61931622184, 10050.494033095052, 9998.310617514979, 9983.492183253435, 9966.100093576688, 9952.6562059839, 9941.474740015314, 9946.759353419195, 9897.801404519265, 9872.843107352972, 9845.928053111982, 9833.62113086899, 9777.863964941422, 9860.089223447483, 9822.288255003987, 9780.815688130648, 9731.608368130648, 9680.339653908823, 9656.645355058248, 9623.23994982949, 9600.171064175482, 9613.272957140523, 9585.435164580349, 9661.671703041888, 9763.747504698807, 9810.77480209165, 9781.764642926917, 9760.030725066363, 9751.368207292742, 9744.051190791091, 9729.29068493629, 9674.875810351967, 9668.302766618874, 9734.27923328554, 9690.820537464355, 9655.576448124253, 9640.147389242997, 9641.426132270884, 9580.35444614314, 9571.671590593485, 9555.683803975993, 9522.320378079792, 9466.703705540933, 9442.406728019003, 9399.929388972405, 9371.25683670857, 9366.737779068548, 9375.306567824005, 9343.198820716567, 9347.037071000981, 9320.617965286696, 9300.5422168996, 9288.324845207999, 9282.952605394263, 9347.10535858082, 9351.83399731858, 9340.182984189476, 9321.763550561158, 9474.798990235071, 9462.304997300544, 9446.233353445796, 9419.505341625465, 9411.420701994128, 9377.268585002485, 9357.244320402306, 9331.78488842796, 9307.38690139175, 9345.148170622519, 9344.434170622519, 9325.618472527281, 9306.202077765822, 9315.024369472208, 9299.878564852383, 9275.718697664883, 9352.267181443509, 9343.57867922916, 9331.005996891727, 9366.765662520895, 9357.286910790392, 9416.184501106965, 9374.890933780232, 9361.78861179881, 9322.352456854875, 9265.41478665339, 9231.0782560309, 9209.577617069861, 9185.9710292836, 9211.307992825266, 9199.368055392111, 9180.800198712825, 9158.308641327065, 9328.758386574213, 9325.424090375, 9441.045956997865, 9439.588728001583, 9414.312390948011, 9396.901376423682, 9453.815032258246, 9454.66787081624, 9448.47460712297, 9436.869554982892, 9426.710799672113, 9488.328397489728, 9481.742896389214, 9467.175346425684, 9451.66316595231, 9440.02012440712, 9476.902444967178, 9500.68199473747, 9547.070005948231, 9523.619027909015, 9494.805112178678, 9692.302917018646, 9623.160588028417, 9595.626897784514, 9559.185862070228, 9484.693007865751, 9451.96235665739, 9414.552600961188, 9404.636893996667, 9392.208327590417, 9375.019409935609, 9359.404704167624, 9377.118333114993, 9357.644276814724, 9363.080012470462, 9387.786487384552, 9356.900862049431, 9339.92721663629, 9323.334534096608, 9301.143829018483, 9288.44950566519, 9261.446406388399, 9302.610957367468, 9421.656865753655, 9396.390365438992, 9348.39595327683, 9397.345066752006, 9349.836380863268, 9406.082210044762, 9386.507021365516, 9383.48450521167, 9364.358047805685, 9373.811867195833, 9362.832970671347, 9343.756471868473, 9318.75647421957, 9301.972482251698, 9290.195239563951, 9283.084072497604, 9260.932136834379, 9254.53429024347, 9253.013475877045, 9239.370790901277, 9216.336213548806, 9185.43199413608, 9168.888334595305, 9142.420976590478, 9145.62714521793, 9127.71950928043, 9110.114460125284, 9164.889012469033, 9126.14062206374, 9125.42662206374, 9238.171672794608, 9246.727390169126, 9235.884505523763, 9247.773428358409, 9239.884957066542, 9223.10096509867, 9201.05071134373, 9206.801053831614, 9202.02346440072, 9192.3266668497, 9177.05475908271, 9182.089937243629, 9173.121246905066, 9161.57906955286, 9150.983919635231, 9130.296069385648, 9104.305615062645, 9086.849238493607, 9081.198729851632, 9078.002454417388, 9091.30984963191, 9075.944567288541, 9108.899377232407, 9084.127140614873, 9069.781645160328, 9062.15273502208, 9056.101205655184, 9044.64717651408, 9059.86072052015, 9046.446146210963, 9047.206545915978, 9042.07270644617, 9029.632688850861, 9019.271329058576, 8989.177667045351, 8974.075489149816, 8967.39347123937, 9008.73652229042, 8984.519943920515, 8978.9888155096, 8956.717019183721, 8944.57036775515, 8968.867613114311, 8924.043383193051, 8872.065639603308, 8859.423694452275, 8829.654870414568, 8787.664003909713, 8755.881068400777, 8747.144959339028, 8740.068871829084, 8722.535418666554, 8691.910840713797, 8703.376511980032, 8678.841931043302, 8734.545371278991, 8717.780011778545], "start": 10000.0}, "agg_H1": {"eq": [150000.0, 149919.9409445977, 149865.47596424975, 149817.9202316088, 149785.60236565236, 149743.12928987393, 149718.05545832153, 149666.49087720347, 149674.79690707315, 149779.5863068644, 149791.57976050867, 149855.64755336358, 149876.55278066976, 149851.5139714301, 149694.48790560546, 149523.8128047943, 149259.03519184623, 149059.2887352974, 149199.97410505818, 149089.27239349092, 149012.12599973552, 148931.44633483625, 149102.17098637111, 148990.13350842922, 149129.54775346833, 149057.96509817033, 149387.25534228017, 149200.14072075393, 149161.8766266536, 149101.76233396036, 148925.75653325938, 148763.62063918158, 148696.08445786242, 148617.79299905713, 148596.26396187922, 148610.74165877711, 148518.56973830532, 148486.3480312388, 148098.19000314383, 147809.50802733435, 147600.18579695048, 147476.6773716362, 147385.01168069348, 147277.49666664135, 146980.90774074508, 146852.0248810321, 146698.84890895255, 146551.40159294428, 146406.5064000591, 146254.56130096354, 146188.06040713534, 146052.65347558985, 146042.22743388882, 145997.3636958031, 145969.5657336955, 145960.2446540762, 145872.43094274894, 145818.01746375847, 145788.7466238425, 145773.76357523332, 145733.4402568622, 145761.2052060004, 145737.6192619564, 145684.26292706587, 145648.07269749788, 145637.38260883375, 145574.82179968565, 145531.20450285068, 145474.80871149397, 145539.67104100116, 145720.79788759965, 145788.28551310266, 145861.34927860097, 146040.07901652483, 146088.30971291618, 146304.89729870344, 146228.64641651834, 146078.38420014395, 145987.85563301414, 145910.20149330326, 145810.32943622704, 145677.2272911789, 145589.26297291086, 145465.29584193384, 145362.08046251128, 145255.60361801359, 145186.3076807036, 145352.69289585124, 145440.70609048565, 145571.6936780259, 145753.75345938493, 146084.82498580107, 146305.29100289982, 146428.12436052746, 146711.88981727272, 146782.4760413741, 146657.01591869607, 146560.1090255236, 146440.93442036203, 146352.25163674183, 146298.4072728931, 146321.16930540933, 146366.0263133203, 146365.26280186995, 146266.88937357714, 146271.28093551451, 146252.2030042758, 146447.94152940775, 146487.0448140447, 146482.3174757602, 146546.6049102998, 146368.03442728225, 146429.6609116634, 146717.5646343467, 147146.4921992687, 147516.56587848492, 147784.67525228692, 148242.65043090686, 148597.61808637972, 148631.7083922337, 148529.5903868178, 148462.77949935434, 148412.69893294308, 148304.60127451844, 148109.9657669464, 147865.93433676605, 147824.2052012, 147763.01479278758, 147776.75550957953, 147750.42870625757, 148204.9393023562, 148316.5649884348, 148202.2647274533, 148059.5263456847, 147913.84495651792, 147635.94405247582, 147487.96268135525, 147406.412647003, 147207.59062219394, 147084.27055808858, 146874.79467752198, 146769.2704416776, 146610.73606527125, 146477.61702428723, 146503.16626266498, 146435.5044162879, 146318.8697748831, 146248.78292597583, 146169.04281367836, 146121.6304830856, 146097.6514572792, 146295.10539923704, 146505.2491364379, 146670.72701051208, 146838.82741070792, 147000.97644559422, 147496.82698317128, 147368.68996427977, 147236.80433994925, 147253.26611574515, 147599.00227226253, 147770.8040396172, 147677.62110071114, 147604.45179144497, 147550.15892889624, 147540.80443261916, 147413.586303325, 147373.43806954785, 147387.83954448462, 147555.51172160578, 147589.0410241829, 147424.0686580235, 147453.17508574028, 147529.71538075292, 147727.3095039396, 148179.68783501067, 148476.9956308651, 149036.4144572048, 149302.0058825277, 149347.98704385597, 149326.39634676313, 149239.75405136234, 149199.72058923414, 149219.19635541653, 149138.987412041, 149026.06248185103, 148884.2414605104, 148799.0909736042, 148737.36220580566, 148618.1881015014, 148462.17173754107, 148272.84005788804, 148477.6589581848, 148610.76532887816, 148314.08574340874, 148139.48412404774, 147985.31246115462, 147818.4500093459, 147715.29603477515, 147646.70706064536, 147560.45887099463, 147459.82616089308, 147480.21787082765, 147337.53269149025, 147233.54906886062, 146945.35285529826, 146825.69153321366, 146733.45360029247, 146607.89056792794, 146404.49484914585, 146257.10278885264, 146246.31266714894, 146111.4895832896, 145978.60566647444, 145901.94381064727, 145796.95517013033, 145715.05068798625, 145783.54510824443, 145986.37501559587, 146026.74503068477, 146186.63644667342, 146414.28514253744, 146675.08599554273, 146770.56354787786, 146722.2626981208, 146643.832798757, 146567.20509081508, 146531.40660340918, 146500.75417563634, 146468.06833526722, 146424.42372208883, 146381.44603072005, 146297.49888353085, 146245.45997819406, 146149.99284221392, 146354.64285699974, 146258.5767991773, 146267.77987118062, 146223.58020444075, 146185.49289406947, 146131.32051307143, 146102.64907183245, 146041.70840374063, 146053.7987263465, 146024.2291395885, 145987.37349679146, 145956.7427941902, 145882.50269116758, 145692.11092236123, 145521.55755628084, 145454.35804981273, 145350.8798745451, 145307.55926165223, 145143.90890018415, 145275.46560895222, 145338.30433638778, 145451.41530792325, 145588.69672771354, 145659.07882225676, 145867.17344721078, 146135.38732255975, 146066.7845168851, 145973.11495483355, 145935.2536409203, 145834.15593251737, 145696.5497619344, 145592.5927332646, 145559.89754496617, 145467.3501958018, 145349.80986732728, 145238.5952975086, 145150.54197000453, 145052.80048912586, 145006.86165709316, 145054.38540941905, 145071.2166684885, 144926.65659229385, 144991.91784281394, 145130.2587641707, 144950.8537704168, 145579.85500192063, 145876.9556125515, 145790.436394357, 146337.07448625538, 147003.58251119746, 147341.96881988563, 147254.9690448506, 147150.07659058174, 147590.61159335735, 148089.28672936693, 148433.00971518946, 149370.67415428083, 149252.01554210894, 149479.85999487728, 149737.7606502695, 149641.17080083737, 149569.1536209023, 149532.54011355253, 149545.76005605707, 149543.8188728022, 149567.45430707524, 149469.26631331773, 149419.66921543685, 149350.92199523514, 149153.65647302204, 149054.28126690743, 148798.32180541067, 148553.45748034358, 148417.62738878792, 148477.17355913503, 148402.0113703374, 148425.3945279163, 148084.91956336144, 147834.22342380494, 147622.50497346776, 147532.40266583863, 147441.41681400748, 147422.76488128997, 147387.4196075821, 147251.84609180733, 147169.263572064, 147151.15414025928, 147114.57314294128, 147063.8955295067, 146917.80520142417, 146940.869720557, 146902.5342680927, 147016.16832719895, 146926.2789208637, 146865.62561944197, 146835.83162587968, 146774.60763894135, 146692.6542547991, 146624.5458257485, 146530.59549478994, 146510.8164160068, 146435.30625736533, 146428.04524050842, 146459.3996785876, 146400.45864462524, 146417.52904114165, 146281.60163021035, 146310.60058504032, 146308.49743867895, 146320.86037544327, 146362.59582046577, 146423.18780861516, 146495.8768288861, 146432.9997302117, 146343.89271532765, 146276.61247078897, 146277.18249213195, 146254.4782793657, 146262.16990544228, 146289.93866426422, 146319.81254523832, 146230.35058263113, 146120.13073040536, 146041.03137703714, 145940.79158164293, 145833.25246153743, 145675.09368098373, 145685.92080468455, 145726.66645915958, 145690.49248027313, 145813.70145761257, 145887.1978078558, 145932.21554107018, 145878.1736525076, 145782.3848754812, 145677.40419938133, 145535.52390261795, 145465.3847755977, 145431.358586207, 145358.61417651002, 145286.3146783395, 145253.91176451324, 145220.1969906292, 145201.80139451567, 145159.00515103573, 145099.94495052646, 145083.7064863275, 145012.1852246357, 145163.36093941893, 145312.05478707855, 145252.33017407305, 145198.68793046955, 145134.8726277664, 144977.57531666703, 144811.86718494282, 144684.18905335557, 144613.9797374961, 144636.47380625297, 144570.39265893114, 144538.70280394674, 144506.36555509575, 144534.88917352667, 144457.4921501917, 144433.51901689632, 144527.74119633244, 144543.34526901454, 144503.90346836028, 144417.38732263158, 144327.58888165222, 144204.27298019172, 144346.5033127497, 144290.8867544938, 144224.67259404896, 144195.28048522855, 144152.82219543718, 144120.99320723917, 144163.33033390105, 144136.8615244146, 144241.98112649153, 144594.84750102612, 144867.02112645196, 144784.04240574504, 144709.67893121592, 144622.0716681201, 144560.28427198122, 144421.9336652905, 144345.5423518828, 144304.78715541304, 144228.1827423916, 144169.5949018535, 144110.23291930175, 144078.92191544684, 144096.16953633103, 144041.65517935585, 143972.46681985699, 143975.2001010468, 143922.11306179478, 143873.99589810357, 143821.41207407071, 143751.95256299726, 143680.58037303793, 143585.8431392421, 143523.4804578423, 143454.909579376, 143447.03535330508, 143385.8577140901, 143361.60270979448, 143293.7336067605, 143320.23593227236, 143353.04589960873, 143333.00631998456, 143304.64375980056, 143264.71710275934, 143229.1742744194, 143228.35331042644, 143200.569853347, 143147.68731992043, 143527.7146656702, 143651.6159296967, 143741.1878202943, 144008.0906630439, 143915.2089838658, 143819.96793885823, 143735.6870298218, 143946.6160983372, 143892.00761280503, 144136.15773620788, 144039.8287599743, 143936.39217717128, 143848.42474996264, 144170.49749386086, 143993.58224137765, 144107.96781461444, 144247.98192682915, 144337.40204823556, 144422.10397286515, 144515.89235980035, 144364.04971097712, 144251.65883255462, 144068.4017020691, 144012.89378740586, 143913.04444734895, 143759.4048017116, 143816.20028382546, 143851.15648193748, 144037.03613014906, 144005.60840367383, 143966.35296431123, 143879.67768598435, 144373.34036277139, 144320.25646855374, 144388.67186403158, 144343.290549689, 144326.27626283898, 144293.9183915643, 144160.05490933498, 144065.5023668503, 144124.57576726124, 144272.6118265977, 144259.3466489089, 144441.24634967058, 144615.18494880968, 144830.46977225592, 145071.70926529533, 145322.64530032827], "start": 150000.0}, "coin_H1_ARB": {"eq": [10000.0, 9971.618171276326, 10205.388331770153, 10079.829778170153, 10018.68216863957, 10070.9772450968, 10038.100470716305, 10011.153693718576, 10043.425901364451, 10019.914517453271, 9951.808854531922, 10080.19953576533, 10034.484022049035, 9969.175401130793, 9985.060639138173, 9934.87344812184, 9855.069664723656, 10077.439972235394, 10030.216902144759, 10010.484708228409, 9969.673087892588, 10075.249044484748, 10132.506367427843, 10384.366231422362, 10282.863294667091, 10148.054548999406, 10060.180664954461, 10019.07805146357, 9989.978542708246, 10067.714361022907, 10043.752849395, 10014.348957078982, 9990.4975073157, 9962.310051742195, 9955.83291075687, 9894.475233898673, 9924.068501791317, 9890.540089827979, 9791.309194451986, 10191.256314141105, 10164.62244378674, 10253.558893653644, 10205.103658760856, 10158.313850163107, 10119.45300378346, 10110.597746408077, 10125.01456880969, 10136.233256682453, 10068.13889350338, 10069.583161033044, 10049.416648600612, 10018.923553782532, 9998.944485260048, 9969.836072596292, 10150.58592928419, 10105.831055070354, 10200.607909631455, 10160.602589914251, 10112.286542295204, 10129.039093088855, 10244.600207789987, 10458.145015315313, 10406.804528206658, 10506.029200369607], "start": 10000.0}, "coin_H1_NEAR": {"eq": [10000.0, 9984.165249801114, 10002.253312497038, 9880.342214420114, 9804.526390406392, 9812.346593299568, 9706.170817766459, 9666.965456829612, 9620.35564450581, 9594.305460461908, 9578.36429249155, 9547.12100277583, 9636.43570297867, 9589.929402643724, 9612.338817234471, 9631.805932364907, 9578.927388168953, 9536.625512888055, 9583.35950857306, 9492.671758487237, 9368.852116597473, 9479.887767100347, 9416.923454928896, 9425.268315213501, 9359.303466649533, 9301.3064540797, 9275.06216169749, 9302.826467617057, 9529.008181105428, 9838.109067003836, 9754.503198250404, 9702.273807831243, 9648.617439380218, 9736.931001617138, 9711.803278184796, 9698.229479132022, 9688.166780401227, 9655.748951001362, 9646.54125230855, 9578.565278676382, 9611.81073821931, 9566.875461038904, 9534.136284837532, 9927.179827390724, 9948.874978462849, 9910.96944080794, 9801.838277204999, 9662.930629782319, 9809.80884807942, 9789.35615431462, 9820.364571497283, 9929.967509981903, 9903.967430723893, 9861.716115845, 9973.088332622408, 9955.938295281108, 9942.003447375157, 9900.321737025193, 9855.98955176053, 9802.152629546617, 9794.338892330708, 9787.900388754171, 9760.169010375794, 9812.836633913805, 10001.244282562453, 9952.46117996505, 9905.295367697392, 9848.680976534299, 10377.62397530353, 10296.430731538445, 10344.098559535467], "start": 10000.0}, "coin_H1_SUI": {"eq": [10000.0, 9998.4190668139, 9951.858080444423, 9928.4486274292, 9986.193784406443, 9899.073265449226, 9835.178602873302, 9807.776365740998, 9764.631159384397, 9757.86045294874, 9654.713998097985, 9658.312010789936, 9719.326259053772, 9644.768764447776, 9598.163548779597, 9695.209887944398, 9751.63234268756, 9958.189600097812, 9926.860117530749, 9932.255974038062, 9834.808444981087, 9769.647439899401, 9728.229885904531, 9835.109911939986, 9794.314364792783, 10048.540587377765, 10018.133583318488, 9957.766180967734, 9903.740393476352, 9840.31369130503, 9803.918171402207, 9731.925504024946, 9669.3027202705, 9730.90203558292, 9714.631789541923, 9716.2166600851, 9692.896089833128, 9622.672173315239, 9820.73867905776, 9772.608849326225, 9724.95601555861, 10185.85078634312, 10186.276039658496, 10156.885760138679, 9996.0679718087, 9905.959347707118, 9887.43776402557, 9821.765517272323, 9848.690931591078, 9857.085041360899, 9812.096124264059, 9850.501626694651, 9816.971914946478, 9796.257751747595, 9785.291003029646, 9775.36243077864, 9836.577255536198, 9816.410675282654, 9807.374218016346, 9779.232789110927, 9742.846795420402, 9728.076508066546, 9718.057601783492, 9693.205156128997, 9659.767229732, 9671.129106429564, 9967.930500712784, 10007.671496256757, 9883.45827344067, 10058.754302431973], "start": 10000.0}, "coin_H1_ENA": {"eq": [10000.0, 9963.84825202429, 10160.52221487864, 10160.080420865033, 10003.733378948866, 9921.913709864404, 9863.22131013278, 9786.506778318915, 9892.697818183582, 10095.378663366306, 10022.797084884238, 9976.416176544913, 9978.623099714388, 10222.555104684398, 10129.315164575504, 9965.542973575504, 9892.84264403982, 9773.717148325202, 9689.76858204517, 9914.84686469316, 9828.957563846938, 9741.769322379632, 9654.18088667793, 9775.697002433557, 9691.862503898757, 9649.98319387079, 9726.371359258357, 9678.258897911724, 9602.4016655988, 9501.247260670518, 9357.20209522934, 9299.893571234023, 9222.028394350715, 9373.029201473564, 9318.560813737715, 9255.511507157456, 9211.640700024655, 9145.184749068303, 9242.91695339412, 9228.373133117622, 9147.522462869689, 9514.414943552529, 9471.102520257075, 9569.830536577549, 9553.471382541306, 9628.935195930428, 9495.116557343472, 9390.91735044692, 9379.790402530254, 9291.00669535322, 9257.762536162367, 9297.972231616912, 9285.88788469748, 9302.437955646665, 9174.939965402762, 9152.989336352482, 9089.934361516596, 9121.904137479256, 9467.025616851994, 9486.66302740944, 9448.728763847095, 9434.802142885484, 9592.429794109343, 9726.397925828902, 9686.218181044544, 9782.743519312782, 9990.176135992037], "start": 10000.0}, "coin_H1_TIA": {"eq": [10000.0, 9975.140688254272, 9972.793856379345, 9893.870339843175, 9856.913050931404, 9825.2033411524, 9692.868407259088, 9608.707541932454, 9541.748646930135, 9540.040811972047, 9600.839488356887, 9546.696732557202, 9490.086568802833, 9662.358681441649, 9637.924820543667, 9593.6062620369, 9605.787733412675, 9855.954949921004, 9775.69571074063, 9701.280655933802, 9599.905254818043, 9517.89673434658, 9473.11738504461, 9629.306433559164, 9793.321835267552, 10136.283141949158, 10104.238205409205, 10065.708371355064, 9965.477511500148, 9861.195525898504, 9743.561491881728, 9653.105702963523, 9595.269245820666, 9806.92344989531, 9783.831004122652, 9687.040031245819, 9801.09234727016, 9781.994785225035, 9738.594582437829, 9662.078988186242, 9663.792989921149, 10011.766943884457, 9968.560148985413, 10042.789653424925, 10063.963457564098, 9978.100197217751, 9870.580953777124, 9867.44331477046, 9834.414571265928, 9779.35710638925, 9803.804390072994, 9839.498530454275, 9784.247652156913, 9826.668893754884, 9770.639989513666, 9742.55740094825, 9719.318157520458, 9640.33661717816, 9600.763802795263, 9535.989192751449, 9765.474895317177, 9789.228947582882, 9699.605026495525, 9620.937366877912, 9797.5317194713, 9753.433142890612, 9725.60128421636, 9800.245861909187, 9816.306027035645, 9935.701860568293], "start": 10000.0}, "coin_H1_ETH": {"eq": [10000.0, 9988.572966782698, 10169.540162122294, 10119.09291502134, 10078.134765836156, 10081.44191100189, 10058.214082445167, 10034.931399219502, 10012.012735173643, 9997.633841704606, 10028.332636954156, 10005.218890612703, 9969.615408546584, 10040.036186571488, 10133.938642047498, 10230.169059219537, 10207.267428021349, 10191.334928845368, 10113.966243039025, 10055.206764267923, 10050.516610203222, 10174.257831286146, 10186.966851113672, 10341.743885157075, 10300.153723671394, 10218.086303426016, 10207.768378813573, 10178.828713158135, 10164.789641085428, 10197.711458083051, 10174.495079034536, 10141.708039589977, 10117.090604192266, 10098.058160520059, 10134.448732914558, 10115.684981046421, 10163.97638557425, 10146.618316008717, 10101.289135190067, 10160.602724328783, 10075.204205122418, 10321.459609066176, 10257.889818591404, 10180.895492969212, 10121.867158342719, 10071.900327133399, 10028.820481790675, 10007.219940289397, 9978.64285660615, 9940.822933572956, 9977.936542495863, 9946.838219959789, 9892.189495052351, 9889.017092269736, 9877.328341642384, 9847.376553796865, 9882.201098168354, 9862.980626478966, 9903.757596080044, 9871.894284853463, 9837.457751411866, 9814.354619199828, 9776.883152608576, 9747.44571716046, 9715.705513393572, 9698.363112587822, 9693.127922222004, 9661.898903115502, 9628.172515918135, 9699.84462280236, 9680.071391641983, 9807.852261683049], "start": 10000.0}, "coin_H1_XRP": {"eq": [10000.0, 9978.27277211967, 10025.317014933687, 9998.91427824322, 9942.92568514967, 9949.58317915439, 9898.875637396828, 9917.773119180425, 9897.524057582803, 9866.206538150442, 9902.567589907983, 9866.245739661119, 9831.043524830078, 9877.456979921497, 9917.379727925698, 10077.013655249812, 10041.53225035339, 10015.735613963336, 9980.975537625913, 9929.55586879311, 9959.79526123555, 10044.338300133255, 10002.090582087983, 9957.393199224787, 9934.95242422373, 10038.619742486102, 10087.354807444357, 10072.380222969052, 10063.780029552294, 10111.20495291396, 10076.655996122949, 10128.485096351531, 10119.015635030924, 10105.545760057379, 10071.042040554741, 10061.403042987962, 10043.116670191992, 10007.749530974274, 10124.308845062642, 10102.16300711257, 10054.203232614995, 10354.585920569607, 10338.338099411092, 10301.532014004848, 10296.87464911333, 10296.63879858414, 10174.230316687705, 10104.574476146323, 10088.293338757296, 10067.90939774606, 10109.59000083436, 10125.64253793708, 10086.74723789464, 10089.343729511054, 10040.391957652426, 10009.277155729797, 9986.601244963113, 9925.784251117433, 9898.592043933108, 9873.568212997587, 9902.172030405345, 9872.247945493014, 9846.263036377126, 9838.287300454933, 9830.578877001253, 9816.04934909821, 9799.355512428763, 9821.11033048216, 9825.524556854993, 9803.309101675639, 9797.741099775569, 9776.087585455507, 9769.488037557745, 9729.741155729429, 9688.939540788442, 9741.409254425442, 9720.928094091936, 9706.133043358026, 9673.289781258858, 9751.904651417613], "start": 10000.0}, "coin_H1_DOT": {"eq": [10000.0, 9982.386235967302, 10017.297241058406, 9939.19469176992, 9892.387642778565, 9867.747682305253, 9786.904934333776, 9723.618483652139, 9674.619840633271, 9661.477403149793, 9641.97115876337, 9632.206563233833, 9729.03156903552, 9653.326847267139, 9613.511925273397, 9690.518148115918, 9733.168232857406, 9676.596735395477, 9626.449839791081, 9846.6721040011, 9792.499606628611, 9785.904997222993, 9756.629768651565, 9811.416858892206, 9930.971301921221, 10179.872598825832, 10134.561730980715, 10124.152641112874, 10041.879635440971, 9931.387741379214, 9812.13730687579, 9927.054664816538, 9899.990931702865, 9873.887160129261, 9866.024997863035, 9770.54033470514, 9830.02750727599, 9759.598890569547, 9709.817184188467, 10084.178380340509, 10096.973069529698, 9979.921255455625, 10020.997241520656, 10044.495703941038, 10033.994076656443, 10034.598938884525, 10002.872911821818, 9923.793070541164, 9885.189885449565, 10064.448188798218, 10042.12461233705, 9966.097319374692, 9931.909733377737, 9935.92182944073, 9924.926690991362, 9877.033583877053, 9808.404906777816, 9766.726246663156, 9724.327684113983, 9697.331726806922, 9773.390309206923, 9736.259152446151, 9688.250214811742, 9635.598943931382, 9589.121602014358, 9628.901813408662, 9603.977709502411, 9586.44425633988, 9575.497690198148, 9697.34134970491], "start": 10000.0}, "coin_H1_INJ": {"eq": [10000.0, 9973.916848375728, 9988.814100486614, 9898.530171925695, 9856.977221625202, 9810.83726661253, 9669.019372208868, 9560.841317476648, 9482.905019593762, 9469.985927282527, 9421.37757689211, 9396.847449573055, 9400.253925463552, 9380.247160147155, 9415.462578004299, 9355.019200904615, 9299.157732848964, 9423.98303988193, 9496.125654609248, 9769.968916653443, 9742.789981440355, 9773.150524553334, 9726.360566538502, 9677.19009183452, 9635.993173171504, 9726.501836231782, 9734.28820187804, 9735.13137972212, 9683.896251100578, 9775.71664245252, 9687.729829273992, 9730.811402543446, 9719.389409108753, 9664.866475123423, 9572.537861434328, 9500.643560394372, 9416.498276115713, 9539.039561564516, 9515.866435239803, 9508.862245950992, 9489.193584455625, 9431.13427872314, 9486.279017194267, 9437.544732323127, 9388.60316502446, 9327.5125886931, 9313.410512800243, 9621.441687951072, 9570.568344618647, 9654.294470372308, 9626.935862344713, 9533.405233478734, 9479.05472817213, 9512.620874589575, 9493.203876525058, 9519.455449832092, 9534.27644239966, 9506.273928094935, 9455.707265530169, 9469.313304384976, 9421.589813375294, 9391.111925857153, 9418.928962855038, 9380.517371214064, 9446.138215387058, 9413.214578235355, 9455.076854780045, 9406.301974745524, 9682.184226186644, 9561.883364866499, 9788.282418256167, 9709.919424202959, 9654.621374246526], "start": 10000.0}, "coin_H1_BNB": {"eq": [10000.0, 10031.715482884914, 10127.23556650094, 10102.558128646246, 10069.30184392208, 10052.625855464159, 10031.037749821746, 9971.353651928974, 9957.088274415806, 9939.131944862438, 9896.466267519641, 9850.621051198166, 9825.938676228081, 9825.27139622995, 10003.562394279994, 10001.570444874671, 10187.016571145588, 10100.718779846824, 9993.366877367524, 10047.216709985807, 10007.331503811114, 9927.634974716695, 9873.816200878558, 9951.422196867145, 9923.549609366768, 9957.077279212202, 9923.435749958391, 9962.439008166719, 9974.691681568633, 9947.994087377601, 9930.825651351131, 9889.029506149851, 9831.340530019686, 9810.86307423339, 9769.502567163865, 9762.379333157764, 9751.583352011388, 9740.170724716068, 9742.054591944448, 9736.212762334537, 9757.393733504729, 9722.50319947053, 9728.450860851923, 9748.038687244662, 9702.11626291482, 9966.766801089412, 9942.304856668692, 9930.975140728118, 9885.950439920141, 9828.701745591723, 9800.735720711598, 9739.753742469535, 9705.39820669147, 9678.754927752487, 9684.281225996194, 9684.941194313606, 9658.243582414363, 9684.27327640751, 9670.049926571342, 9649.38300825492, 9616.649206064418, 9608.618052726844, 9608.40237096682, 9604.847344460035, 9607.345075472589, 9601.346569397576, 9627.01240224374, 9597.233424370677, 9575.895250160878, 9582.851627843758, 9629.042120300845, 9632.730534896975, 9628.226870087447, 9589.938026603693, 9552.486088746391, 9594.518961014002], "start": 10000.0}, "coin_H1_APT": {"eq": [10000.0, 9987.934134851017, 10036.26069688493, 9950.037495983774, 9885.147491026795, 9870.389160284563, 9764.198208996686, 9742.562299467676, 9734.75863280101, 9719.425832613655, 9698.93771085666, 9675.32717933807, 9687.592268451539, 9633.3855515686, 9603.90453625235, 9664.471345767699, 9910.356766504023, 9893.447956843745, 9863.832935907301, 10234.133156274644, 10240.539599520034, 10277.630494645095, 10255.566978540486, 10303.60998273106, 10229.049092185483, 10499.013468145966, 10362.155462878847, 10266.169367640752, 10176.144739061749, 10211.717342322301, 10175.914375248836, 10143.005553509434, 10166.304815747833, 10085.412922198873, 10119.237426641124, 10105.26593883366, 10049.95178753095, 10168.70488249498, 10074.698407947468, 10391.627397966182, 10321.671418888383, 10279.912653283844, 10272.387668483005, 10238.944310171659, 10210.749066737832, 10177.236476573897, 10108.577673562093, 10051.730103911437, 10027.456190328638, 9955.575569113309, 9928.08718158613, 10044.811253283093, 10008.325883705369, 9979.558912941646, 9938.116567845882, 9889.103627502223, 9844.540575210869, 9811.09728063161, 9890.551049862379, 9828.234979191384, 9805.712068802964, 9773.7206222162, 9747.54830629907, 9715.920027962453, 9716.010488680691, 9663.715109547109, 9705.138613179302, 9824.526173575523, 9774.632322001622, 9717.441249539443, 9679.280832293412, 9608.252821512904, 9526.08120799558, 9486.533303181455, 9462.814745596741, 9585.969910588638], "start": 10000.0}, "coin_H1_LINK": {"eq": [10000.0, 9983.516884242461, 10262.276747090904, 10133.095848143535, 10132.665653343081, 10020.814395912923, 9949.695294646639, 10041.504401151566, 10053.374045785386, 10009.796150065973, 9957.034046628998, 10019.955548098314, 10031.605602187294, 9963.85454939736, 9875.971816465633, 9984.447262943517, 9931.526824547047, 9889.997770940972, 9807.981248384382, 9761.216491311097, 9709.473159585124, 9770.693533745512, 9721.058582497148, 9665.922542104348, 9626.292848511897, 9784.883713490255, 9790.161119207176, 9765.378034651721, 9806.269225522163, 9774.179903932474, 9709.543720845617, 9666.68443260945, 9646.617913321194, 9726.858918038859, 9702.30442321141, 9700.295567455403, 9687.951237650119, 9650.92901333883, 9700.130136711867, 9691.374198394811, 9712.11784049066, 10060.671133084605, 10019.38866155994, 9988.750451230424, 9991.212081364301, 9992.873957523541, 9922.464861162585, 9770.4660650378, 9717.58481628158, 9733.517364528174, 9722.244954647424, 9688.002001020242, 9700.499631073551, 9686.95632393774, 9647.511567011334, 9662.227527493207, 9648.367850534945, 9638.844217626487, 9661.553968143373, 9648.040787671993, 9642.895746005326, 9603.989131245753, 9581.19660031405, 9536.61210365798, 9513.009523256762, 9498.96173114669, 9474.07051633816, 9457.370813653086, 9547.679303809302, 9516.455249185394, 9473.407680951666, 9416.82558654642, 9387.698204334654, 9437.181329782683, 9409.551903775544, 9409.571841413108, 9390.089633210884, 9417.605910923337, 9387.752608866358, 9443.369611472295], "start": 10000.0}, "coin_H1_SEI": {"eq": [10000.0, 9956.092692573402, 9957.364738268767, 9814.49822339765, 9738.868848108297, 9717.816028902793, 9577.66684649936, 9494.62920310784, 9444.22919487874, 9455.296330313447, 9573.011819973455, 9498.626903332904, 9419.13193135392, 9530.625275460385, 9503.867756902211, 9450.001772658898, 9461.113751086177, 9412.927513809698, 9348.874348018497, 9553.280868523228, 9504.083301503828, 9581.24695488659, 9502.168981017243, 9409.273774365116, 9378.615400925275, 9453.584611939172, 9430.050253921354, 9646.507773579473, 9642.156062516882, 9623.904759375904, 9528.465076676694, 9491.25906874648, 9498.193446711284, 9644.076941775826, 9620.239527185078, 9609.503735746099, 9572.734082003988, 9502.771795755158, 9491.562856122611, 9466.083165583266, 9519.706964547891, 9500.983264056893, 9466.519259233743, 9832.82475756985, 9804.525339698628, 9828.144347806736, 9711.266846837207, 9634.83235929607, 9615.913904896302, 9657.357701008485, 9659.431241519716, 9717.443590971285, 9673.25258539111, 9729.010351520143, 9660.853625024416, 9616.637360788847, 9613.868404145229, 9605.661093283805, 9585.9947538786, 9519.133616137031, 9486.442409810392, 9453.03820492697, 9429.75448741586, 9356.80663346897, 9381.867991569055, 9326.727424180268, 9273.961749776254, 9306.681256394388, 9435.328794908595, 9470.547594090165, 9408.858671279286, 9326.24703642243, 9367.146154187827, 9338.194473308315, 9273.49523288063, 9356.015629762383], "start": 10000.0}, "coin_H1_SOL": {"eq": [10000.0, 9994.99640525141, 10014.629586862218, 9954.679772531465, 9958.726492522806, 9908.441855875171, 9871.612251235943, 9744.348989602464, 9702.530470744348, 9668.97746433662, 9636.10925120309, 9610.484980739579, 9730.247560725145, 9673.95339936834, 9646.97152684963, 9766.109806739345, 9826.835658898814, 9950.869956372544, 9918.39369922093, 9898.732344414555, 9830.419641054124, 9765.096589518611, 9764.643320608857, 9911.67435445501, 9865.513695396086, 9941.365481165318, 9860.227613540717, 9823.870184537924, 9817.254071920386, 9773.776607262811, 9707.478828414629, 9625.760604152136, 9536.593091690425, 9473.762675208336, 9426.610491834253, 9474.103740929277, 9462.142668114127, 9471.76972533025, 9478.421515856566, 9460.580593503057, 9530.727963109504, 9497.015691469034, 9523.795801699067, 9913.195297701292, 9867.47799419092, 9825.813707641213, 9802.177373314224, 9801.815529028845, 9713.68117041868, 9563.055168231904, 9515.149161743482, 9494.702864455705, 9467.746077581784, 9445.85862328357, 9469.337002510063, 9452.110608841323, 9435.275127915953, 9398.373671438449, 9342.802544120099, 9358.832370161887, 9288.760655557518, 9255.488044986054, 9214.348653049585, 9158.356458753684, 9151.129340751753, 9103.519809782601, 9065.000285652672, 9043.54099942166, 9028.067328384572, 8973.38370244044, 8945.378800381517, 8929.924421244574, 8910.892657386097, 8926.033106200373, 9008.314636201567, 9057.954546213683, 9009.125045749754, 9003.291636221302, 8985.006023298523, 9101.06617458184], "start": 10000.0}, "coin_H1_AVAX": {"eq": [10000.0, 9974.171495239378, 9971.267696772784, 9890.87652452251, 9850.68741967888, 9797.409991911922, 9761.188337983767, 9718.292117137922, 9647.606707725028, 9576.250404729934, 9523.703956882351, 9509.97077001559, 9528.750979841503, 9497.979458948308, 9752.454470584556, 9641.955259505192, 9551.677456089566, 9602.796565060502, 9593.270759718509, 9831.023674128406, 9755.40227285536, 9789.864305551226, 9719.826253318291, 9643.3003973834, 9564.013553995701, 9617.968242681987, 9598.81855033525, 9799.337017411784, 9815.160303609007, 9760.298344576955, 9647.461680259597, 9620.428466832516, 9602.703967164009, 9682.354378434991, 9662.497931808524, 9625.383137092233, 9611.848064547143, 9509.270672098908, 9532.499775864846, 9488.082256431997, 9411.331691436479, 9729.28642378459, 9694.52105762906, 9653.198393834979, 9641.046830905916, 9589.940067568174, 9552.71900869526, 9555.055874178322, 9533.26341913626, 9491.798269024652, 9519.492354279344, 9508.868665541075, 9501.239220936015, 9501.149273961591, 9448.747532492594, 9458.130388663742, 9421.52097339166, 9393.437739456725, 9385.341347378848, 9375.042143343226, 9341.066239144922, 9251.385400383084, 9213.561191431027, 9148.823461865042, 9109.920387737286, 9080.778589244283, 9056.627282147778, 9039.723152780147, 9012.333730461825, 9000.670872962908, 9048.819259928285, 9021.933426305393, 8980.700085502684, 8997.638222725021, 8934.076844766441, 8857.90463831701, 8827.320827560037, 8812.444202789693, 8784.779043475968, 8800.60801872512, 8786.535760373226, 8877.953962630563], "start": 10000.0}};
+const DPR = window.devicePixelRatio || 1;
+
+function drawChart(canvasId, data, big) {
+  const canvas = document.getElementById('chart_' + canvasId);
+  if (!canvas) return;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const W = rect.width, H = big ? 220 : 120;
+  canvas.width = W * DPR; canvas.height = H * DPR;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(DPR, DPR);
+  const eq = data.eq, n = eq.length;
+  if (n < 2) return;
+  const startVal = data.start, endVal = eq[n-1];
+  const pad = { t: big ? 35 : 20, r: 65, b: big ? 28 : 16, l: 12 };
+  const cW = W - pad.l - pad.r, cH = H - pad.t - pad.b;
+  const minV = Math.min(...eq) * 0.9998, maxV = Math.max(...eq) * 1.0002;
+  const range = maxV - minV || 1;
+  function x(i) { return pad.l + (i / (n-1)) * cW; }
+  function y(v) { return pad.t + (1 - (v - minV) / range) * cH; }
+  ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1;
+  const gl = big ? 5 : 3;
+  for (let i = 0; i <= gl; i++) {
+    const gY = pad.t + (i / gl) * cH, gV = maxV - (i / gl) * range;
+    ctx.beginPath(); ctx.moveTo(pad.l, gY); ctx.lineTo(W - pad.r, gY); ctx.stroke();
+    ctx.fillStyle = '#475569'; ctx.font = '10px monospace'; ctx.textAlign = 'left';
+    ctx.fillText('$' + gV.toFixed(0), W - pad.r + 4, gY + 3);
+  }
+  ctx.strokeStyle = '#334155'; ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(pad.l, y(startVal)); ctx.lineTo(W - pad.r, y(startVal)); ctx.stroke();
+  ctx.setLineDash([]);
+  const grad = ctx.createLinearGradient(0, pad.t, 0, H - pad.b);
+  if (endVal >= startVal) {
+    grad.addColorStop(0, 'rgba(34,197,94,0.25)'); grad.addColorStop(1, 'rgba(34,197,94,0.02)');
+  } else {
+    grad.addColorStop(0, 'rgba(239,68,68,0.02)'); grad.addColorStop(1, 'rgba(239,68,68,0.25)');
+  }
+  ctx.beginPath(); ctx.moveTo(x(0), y(eq[0]));
+  for (let i = 1; i < n; i++) ctx.lineTo(x(i), y(eq[i]));
+  ctx.lineTo(x(n-1), H-pad.b); ctx.lineTo(x(0), H-pad.b);
+  ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(x(0), y(eq[0]));
+  for (let i = 1; i < n; i++) ctx.lineTo(x(i), y(eq[i]));
+  ctx.strokeStyle = endVal >= startVal ? '#22c55e' : '#ef4444';
+  ctx.lineWidth = big ? 2 : 1.5; ctx.stroke();
+  const tip = document.getElementById('tip_' + canvasId);
+  if (tip) {
+    canvas.addEventListener('mousemove', function(e) {
+      const br = canvas.getBoundingClientRect();
+      const mx = e.clientX - br.left;
+      const idx = Math.round(((mx - pad.l) / cW) * (n-1));
+      if (idx >= 0 && idx < n) {
+        const val = eq[idx], pnl = val - startVal, pct = pnl / startVal * 100;
+        tip.style.display = 'block';
+        tip.style.left = (mx + 12) + 'px';
+        tip.style.top  = (y(val) - 20) + 'px';
+        tip.innerHTML  = '<b>$' + val.toFixed(2) + '</b><br>'
+          + '<span style="color:' + (pnl >= 0 ? '#22c55e' : '#ef4444') + '">'
+          + (pnl >= 0 ? '+' : '') + '$' + pnl.toFixed(2)
+          + ' (' + (pnl >= 0 ? '+' : '') + pct.toFixed(2) + '%)</span><br>'
+          + '<span style="color:#64748b">Trade ' + idx + '/' + (n-1) + '</span>';
+      }
+    });
+    canvas.addEventListener('mouseleave', function() { tip.style.display = 'none'; });
+  }
+}
+
+window.addEventListener('load', function() {
+  for (const [id, data] of Object.entries(CHARTS))
+    drawChart(id, data, id.startsWith('agg_'));
+});
+window.addEventListener('resize', function() {
+  for (const [id, data] of Object.entries(CHARTS))
+    drawChart(id, data, id.startsWith('agg_'));
+});
+</script>
+
+<footer>
+Alpha-1 Bangoc Backtest | Binance Futures | Fee: 0.0357% / side | 2025-08-01 &rarr; 2026-06-04 | Generated: 2026-06-04 15:02
+</footer>
+</div></body></html>
