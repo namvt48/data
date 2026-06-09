@@ -1,0 +1,67 @@
+PHAN TICH LENH HYPERLIQUID BTC MARKET BUY
+
+KET QUA CHINH
+
+Lenh market buy 10.69 USD da fill toan bo:
+
+Size:                 0.00017 BTC
+Mid truoc lenh:       62,888.50 USD
+Gia fill trung binh:  62,891.00 USD
+Chenh lech gia:       +2.50 USD/BTC
+Slippage thuc te:     0.398 bps = 0.00398%
+
+Day la muc slippage gia rat thap. Lenh cho phep slippage toi da:
+
+--slippage 0.005 = 50 bps
+
+Nhung thuc te chi mat 0.398 bps, bang khoang 0.8% gioi han cho phep.
+
+CHI PHI
+
+Chi phi do truot gia:
+2.50 USD x 0.00017 BTC = 0.000425 USD
+
+Trading fee:
+0.004618 USD
+
+Tong chi phi execution:
+0.005043 USD
+
+Quy doi theo notional 10.69147 USD:
+
+Slippage gia:  0.398 bps
+Trading fee:   4.319 bps
+Tong chi phi:  4.717 bps, tuong duong khoang 0.0472%
+
+Trading fee lon hon chi phi truot gia khoang 11 lan. Voi lenh BTC nho nhu
+the nay, phi taker la chi phi chinh.
+
+THOI GIAN
+
+Fill latency:      846 ms
+API response:    1,122 ms
+
+Lenh da fill khoang 276 ms truoc khi API response tra ve may.
+
+Mid price thay doi trong qua trinh dat lenh:
+
+Mid truoc:  62,888.50 USD
+Mid sau:    62,891.50 USD
+Bien dong:  +0.477 bps
+Fill:       62,891.00 USD
+
+Gia fill thap hon mid sau lenh 0.50 USD. Phan lon slippage quan sat duoc den
+tu thi truong tang nhe trong thoi gian gui lenh, khong phai do thieu thanh
+khoan.
+
+KET LUAN
+
+- Thanh khoan BTC rat tot cho kich thuoc lenh khoang 10 USD.
+- Slippage gia gan nhu khong dang ke.
+- Latency tu ket noi hien tai khoang 0.85-1.12 giay.
+- Trading fee la chi phi execution chinh.
+- crossed=true xac nhan day la taker order.
+
+Luu y: mid_before duoc do khoang 99 ms truoc khi thuc su gui lenh, nen
+slippage 0.398 bps bao gom ca spread va bien dong gia trong khoang thoi gian
+do.
