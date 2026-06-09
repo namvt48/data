@@ -1,0 +1,45 @@
+{
+  "run_id": "20260609-150329",
+  "vantage": "vn-home",
+  "symbols": [
+    "BTC-PERP",
+    "ETH-PERP",
+    "SOL-PERP",
+    "ZEC-PERP",
+    "HYPE-PERP",
+    "XAU-PERP",
+    "XAG-PERP",
+    "MU-PERP",
+    "WLD-PERP",
+    "H-PERP",
+    "ALLO-PERP",
+    "XRP-PERP",
+    "CL-PERP",
+    "BEAT-PERP",
+    "MRVL-PERP",
+    "SOXL-PERP",
+    "VELVET-PERP",
+    "SNDK-PERP",
+    "NEAR-PERP",
+    "DOGE-PERP"
+  ],
+  "exchanges": [
+    "binance",
+    "bybit",
+    "okx",
+    "kucoin",
+    "bingx",
+    "hyperliquid"
+  ],
+  "symbol_selection": {
+    "mode": "top",
+    "source_exchange": "binance",
+    "top_count": 20
+  },
+  "duration_s": 300.0,
+  "sample_interval_s": 5,
+  "ping_interval_s": 7,
+  "funding_interval_s": 60,
+  "started_ms": 1780992209040,
+  "ended_ms": 1780992509113
+}
