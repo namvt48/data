@@ -1,0 +1,3 @@
+case,symbol,timeframe,sizing_usd,trades,wins,losses,win_rate_pct,net_pnl_usd,final_balance_usd
+signal,XAU (PAXGUSDT proxy),H1,2000.0,268,93,175,34.701492537313435,90.42295595924043,10090.42295595924
+hard_sl,XAU (PAXGUSDT proxy),H1,2000.0,268,77,191,28.73134328358209,-14.427737180310942,9985.572262819689
