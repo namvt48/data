@@ -1,0 +1,2 @@
+case,symbol,master_tf,voter_tf,trades,wins,losses,win_rate_pct,gross_pnl_usd,fee_usd,net_pnl_usd,profit_factor,sharpe,max_dd_pct,longs,shorts,avg_trade_usd,final_balance_usd
+XAU master + 2/3 voter consensus,XAU (PAXGUSDT proxy),"H1 Supertrend(10,3.0)",M15,263,92,171,34.98,558.42,368.38,190.04,1.062,0.313,2.97,134,129,0.72,10190.04
